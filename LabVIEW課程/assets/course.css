@@ -1,0 +1,134 @@
+/* ===== 雙龍門 LabVIEW 課程：版面 ===== */
+:root{
+  --bg:#f4f5f7; --paper:#ffffff; --ink:#1d2330; --mute:#5c6577; --line:#d9dde5;
+  --accent:#1f6feb; --accent2:#0b8a5f; --warn:#c2410c; --bad:#b91c1c; --hl:#fff4c2;
+  --side:#1b2333; --side-ink:#c9d3e4; --side-hi:#ffffff;
+  --code:#eef1f6;
+  --font:"Microsoft JhengHei UI","Microsoft JhengHei","PingFang TC","Noto Sans TC",system-ui,sans-serif;
+  --mono:Consolas,"Cascadia Mono","Courier New",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:var(--font);color:var(--ink);background:var(--bg);font-size:16px;line-height:1.75}
+a{color:var(--accent)}
+code,kbd,.mono{font-family:var(--mono)}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.92em}
+kbd{background:#fff;border:1px solid #b9c0cc;border-bottom-width:2px;border-radius:4px;padding:0 5px;font-size:.85em}
+
+/* ---- 外框 ---- */
+#app{display:grid;grid-template-columns:300px 1fr;height:100vh}
+#side{background:var(--side);color:var(--side-ink);overflow-y:auto;padding:14px 0 40px}
+#side h1{font-size:17px;color:#fff;margin:4px 18px 2px;line-height:1.4}
+#side .sub{font-size:12px;margin:0 18px 12px;color:#8ea0bd}
+#side .prog{margin:0 18px 14px;height:6px;background:#2c3850;border-radius:3px;overflow:hidden}
+#side .prog i{display:block;height:100%;background:#3fb950;width:0}
+#side .part{font-size:12px;letter-spacing:.06em;color:#7f93b4;margin:14px 18px 4px;text-transform:uppercase}
+#side a.ls{display:flex;gap:8px;align-items:flex-start;padding:6px 18px;color:var(--side-ink);text-decoration:none;font-size:14px;line-height:1.45;border-left:3px solid transparent}
+#side a.ls:hover{background:#243049;color:#fff}
+#side a.ls.on{background:#2a3958;color:#fff;border-left-color:#58a6ff}
+#side a.ls .no{flex:0 0 26px;font-family:var(--mono);color:#7f93b4}
+#side a.ls .ck{margin-left:auto;color:#3fb950;visibility:hidden}
+#side a.ls.done .ck{visibility:visible}
+#main{overflow-y:auto;scroll-behavior:smooth}
+#content{max-width:1180px;margin:0 auto;padding:28px 34px 120px}
+#menuBtn{display:none}
+
+/* ---- 課文 ---- */
+.lhead{border-bottom:1px solid var(--line);margin-bottom:22px;padding-bottom:14px}
+.lhead .kicker{color:var(--accent);font-weight:700;font-size:14px}
+.lhead h2{font-size:30px;margin:2px 0 6px;line-height:1.3}
+.lhead .meta{color:var(--mute);font-size:14px}
+.goal{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:16px 0 8px}
+.goal>div{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.goal b{display:block;font-size:13px;color:var(--mute);font-weight:600;margin-bottom:2px}
+h3{font-size:22px;margin:38px 0 10px;padding-top:6px;line-height:1.35}
+h3 .tag{font-size:12px;font-weight:700;color:#fff;background:var(--accent);border-radius:4px;padding:2px 7px;margin-right:8px;vertical-align:3px}
+h3 .tag.b{background:var(--accent2)} h3 .tag.r{background:#7c3aed} h3 .tag.q{background:#d97706} h3 .tag.x{background:#be185d}
+h4{font-size:17px;margin:22px 0 6px}
+p{margin:8px 0}
+.note,.warn,.tip,.why{border-radius:8px;padding:10px 14px;margin:14px 0;border:1px solid}
+.note{background:#eef5ff;border-color:#c7dcfb}
+.tip{background:#ecfdf3;border-color:#b7ebcc}
+.warn{background:#fff4ec;border-color:#fdd2b4}
+.why{background:#f6f0ff;border-color:#dccbfb}
+.note b:first-child,.tip b:first-child,.warn b:first-child,.why b:first-child{margin-right:6px}
+table.t{border-collapse:collapse;margin:12px 0;width:100%;background:var(--paper);font-size:15px}
+table.t th,table.t td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+table.t th{background:#f0f2f6;font-weight:700}
+table.t td.c{text-align:center}
+.wire-table td:first-child,.wire-table td:nth-child(3){font-weight:600}
+.wire-table td.arrow{text-align:center;color:var(--mute);width:36px}
+ul,ol{padding-left:24px;margin:8px 0}
+li{margin:3px 0}
+.fig{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px;margin:14px 0}
+.fig .cap{font-size:13px;color:var(--mute);margin-top:6px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.navbtm{display:flex;justify-content:space-between;margin-top:50px;gap:12px}
+.navbtm a,.btn{display:inline-block;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 16px;text-decoration:none;color:var(--ink);cursor:pointer;font:inherit}
+.navbtm a:hover,.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.pri{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.pri:hover{color:#fff;filter:brightness(1.08)}
+.donebar{margin-top:40px;padding:16px;border:1px dashed #9fb3d1;border-radius:10px;background:#fff;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+
+/* 選盤路徑 */
+.pal{display:inline-flex;flex-wrap:wrap;align-items:center;gap:2px;font-size:13px;background:#fffbe6;border:1px solid #ecd98c;border-radius:6px;padding:2px 8px;margin:2px 0;line-height:1.6}
+.pal span{white-space:nowrap}
+.pal span+span:before{content:"▸";color:#a08a2a;margin:0 4px}
+.pal span:last-child{font-weight:700}
+.qd{font-size:13px;color:var(--mute)}
+
+/* 步驟播放器 */
+.stepper{background:var(--paper);border:1px solid var(--line);border-radius:12px;margin:16px 0;overflow:hidden}
+.stepper .bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f0f3f8;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.stepper .bar .ttl{font-weight:700;margin-right:auto}
+.stepper .dots{display:flex;gap:4px;flex-wrap:wrap}
+.stepper .dots i{width:22px;height:22px;border-radius:50%;background:#dde3ec;font-style:normal;font-size:11px;display:grid;place-items:center;cursor:pointer;color:#445}
+.stepper .dots i.on{background:var(--accent);color:#fff}
+.stepper .dots i.seen{background:#9ec1f7;color:#fff}
+.stepper .txt{padding:12px 16px;border-bottom:1px solid var(--line);min-height:88px}
+.stepper .txt h5{margin:0 0 4px;font-size:16px}
+.stepper .stage{padding:8px}
+
+/* 測驗 */
+.quiz{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:12px 0}
+.quiz .q{font-weight:700;margin-bottom:6px}
+.quiz label{display:block;padding:6px 10px;border:1px solid var(--line);border-radius:6px;margin:5px 0;cursor:pointer}
+.quiz label:hover{border-color:#9fb3d1}
+.quiz label.right{background:#e8f8ee;border-color:#3fb950}
+.quiz label.wrong{background:#fdecec;border-color:#e5534b}
+.quiz .ex{display:none;margin-top:8px;font-size:15px;background:#f6f8fa;border-radius:6px;padding:8px 10px}
+.quiz.answered .ex{display:block}
+.quiz input{margin-right:8px}
+
+/* 動手做清單 */
+.todo{list-style:none;padding:0}
+.todo li{padding:6px 10px 6px 36px;position:relative;border-bottom:1px dashed var(--line)}
+.todo li:before{content:"";position:absolute;left:8px;top:11px;width:16px;height:16px;border:2px solid #9fb3d1;border-radius:4px;background:#fff}
+.todo li.ok:before{background:#3fb950;border-color:#3fb950}
+.todo li.ok{color:var(--mute);text-decoration:line-through}
+
+/* 封包顯示 */
+.frame{display:flex;flex-wrap:wrap;gap:3px;font-family:var(--mono);margin:6px 0}
+.frame span{display:inline-flex;flex-direction:column;align-items:center;border:1px solid #c9d2e0;border-radius:4px;padding:1px 5px;background:#fff;min-width:26px}
+.frame span small{font-size:10px;color:var(--mute)}
+.frame span.ctl{background:#ffe9f6;border-color:#f3a6d6}
+.frame span.adr{background:#e9f0ff;border-color:#a9c3f7}
+.frame span.len{background:#eafaf0;border-color:#9fdcb4}
+.frame span.dat{background:#fff6e0;border-color:#efcf86}
+.frame span.sum{background:#f3ecff;border-color:#c8b2f4}
+
+@media (max-width:900px){
+  #app{grid-template-columns:1fr}
+  #side{position:fixed;inset:0 30% 0 0;z-index:20;transform:translateX(-100%);transition:transform .2s}
+  #side.open{transform:none}
+  #menuBtn{display:block;position:fixed;top:10px;left:10px;z-index:30}
+  #content{padding:56px 16px 100px}
+  .cols{grid-template-columns:1fr}
+}
+
+/* 模擬考 */
+.exam .exbar{position:sticky;top:0;z-index:5;display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:12px 0;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.exam .exbar .btn{margin-left:auto}
+.exam .clock{font-family:var(--mono);font-weight:700;color:#b45309}
+.quiz .qfig .lvwin{margin:6px 0 10px}
+.quiz .qfig pre{background:#f6f8fa;border-radius:6px;padding:8px 10px;font-size:14px;overflow:auto}

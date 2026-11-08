@@ -1,0 +1,93 @@
+/* ===== 仿 LabVIEW 視窗 ===== */
+.lvwin{border:1px solid #9aa3b2;border-radius:8px;overflow:hidden;background:#cfd5de;margin:12px 0;box-shadow:0 2px 10px rgba(30,40,60,.08)}
+.lvhead{display:flex;align-items:center;gap:4px;background:linear-gradient(#eef1f6,#dde2ea);border-bottom:1px solid #a9b1bf;padding:4px 8px;font-size:13px}
+.lvhead .vname{font-weight:700;margin-right:10px;font-family:var(--mono)}
+.lvhead .vt{border:1px solid #a9b1bf;background:#f7f8fa;border-radius:4px;padding:1px 9px;cursor:pointer;font-size:12px}
+.lvhead .vt.on{background:#fff;border-color:#4a7fd4;color:#1d4fa0;font-weight:700}
+.lvhead .hint{margin-left:auto;color:#5c6577;font-size:12px}
+.lvbody{display:grid;gap:1px;background:#a9b1bf}
+.lvbody.split{grid-template-columns:minmax(0,var(--fpw,1fr)) minmax(0,var(--bdw,1.25fr))}
+.lvbody.stack{grid-template-columns:1fr}
+.lvpane{background:#fff;display:flex;flex-direction:column;min-width:0}
+.lvpane.hide{display:none}
+.lvtool{display:flex;align-items:center;gap:3px;padding:3px 6px;background:#eceef2;border-bottom:1px solid #c4cad4;min-height:30px}
+.lvtool .pt{font-size:11px;color:#5c6577;margin-right:6px;white-space:nowrap}
+.lvtool button{width:28px;height:24px;border:1px solid transparent;background:transparent;border-radius:3px;padding:0;cursor:pointer;display:grid;place-items:center}
+.lvtool button:hover{border-color:#a9b1bf;background:#fff}
+.lvtool button.on{border-color:#4a7fd4;background:#dfeaff}
+.lvtool button:disabled{opacity:.35;cursor:default}
+.lvtool .sep{width:1px;height:18px;background:#c4cad4;margin:0 4px}
+.lvtool .msg{margin-left:auto;font-size:12px;color:#335;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lvscroll{overflow:auto;flex:1}
+.lvpane:not(.bd) .lvscroll{background:#e9e9e9}
+.fp{position:relative;background:#e9e9e9;background-image:radial-gradient(#d6d6d6 1px,transparent 1px);background-size:12px 12px}
+.bd svg{display:block}
+
+/* 前面板控制項（Modern 風格近似） */
+.fp .it{position:absolute;font-size:12px;font-family:Tahoma,"Microsoft JhengHei UI",sans-serif;color:#111;line-height:1.2}
+.fp .lab{display:block;white-space:nowrap;margin-bottom:2px}
+.fp .numc{display:flex;align-items:stretch;height:22px}
+.fp .numc .arw{display:flex;flex-direction:column;width:14px;margin-right:2px}
+.fp .numc .arw b{flex:1;border:1px solid #8c8c8c;background:linear-gradient(#fafafa,#d8d8d8);font-size:7px;display:grid;place-items:center;cursor:pointer;user-select:none}
+.fp .numc .arw b:active{background:#cfcfcf}
+.fp input.nv,.fp .nv{height:22px;border:1px solid #7a7a7a;border-radius:2px;background:#fff;font:12px Tahoma,sans-serif;padding:2px 4px;text-align:right;width:100%;box-shadow:inset 1px 1px 0 #cfcfcf}
+.fp .ind .nv{background:#f2f2f2;display:block;overflow:hidden;white-space:nowrap}
+.fp textarea.sv,.fp .sv{border:1px solid #7a7a7a;border-radius:2px;background:#fff;font:12px Consolas,monospace;padding:3px 5px;width:100%;resize:none;display:block;min-height:22px;white-space:pre-wrap;word-break:break-all;box-shadow:inset 1px 1px 0 #cfcfcf}
+.fp .ind .sv{background:#f2f2f2}
+.fp .cc{display:inline-block;background:#ffd6ef;color:#a0006a;border-radius:3px;padding:0 2px;margin:0 1px;font-size:10px}
+.fp .led{width:24px;height:24px;border-radius:50%;border:2px solid #555;background:radial-gradient(circle at 35% 35%,#3e5a3e,#132313);box-shadow:inset 0 0 2px #000}
+.fp .led.on{background:radial-gradient(circle at 35% 35%,#d6ffd0,#2fd12f 45%,#0d7a0d)}
+.fp .led.red.on{background:radial-gradient(circle at 35% 35%,#ffe0e0,#ff3030 45%,#9a0000)}
+.fp .led.yel.on{background:radial-gradient(circle at 35% 35%,#fff7cc,#ffd000 45%,#9a7a00)}
+.fp .led.sq{border-radius:3px}
+.fp .bbtn{min-width:64px;height:28px;border:1px solid #6d6d6d;border-radius:4px;background:linear-gradient(#fdfdfd,#d4d4d4);font:12px Tahoma,"Microsoft JhengHei UI",sans-serif;cursor:pointer;box-shadow:0 1px 0 #fff inset,0 1px 2px rgba(0,0,0,.25);padding:0 10px}
+.fp .bbtn.down{background:linear-gradient(#bdbdbd,#e6e6e6);box-shadow:inset 0 2px 3px rgba(0,0,0,.35)}
+.fp .bbtn.lit{background:linear-gradient(#b8f5b8,#47c847);border-color:#2d7a2d}
+.fp .bbtn.stopb{color:#b00;font-weight:700}
+.fp .tog{width:34px;height:52px;border:1px solid #666;border-radius:6px;background:linear-gradient(90deg,#cfcfcf,#f7f7f7,#cfcfcf);position:relative;cursor:pointer}
+.fp .tog i{position:absolute;left:9px;width:14px;height:22px;border-radius:3px;background:linear-gradient(#999,#555);top:26px;transition:top .1s}
+.fp .tog.on i{top:4px;background:linear-gradient(#5ad35a,#1b7a1b)}
+.fp select.ring{height:22px;border:1px solid #7a7a7a;font:12px Tahoma,sans-serif;background:#fff;width:100%}
+.fp .visa{display:flex;align-items:center;gap:3px}
+.fp .visa i{font-style:normal;font-size:9px;background:#6b3fa0;color:#fff;border-radius:2px;padding:1px 2px}
+.fp .errc{border:2px solid #9c8400;border-radius:4px;background:#f7efc4;padding:4px 6px;width:150px}
+.fp .errc .row{display:flex;gap:6px;align-items:center;margin:2px 0}
+.fp .errc .st{width:20px;height:20px;border:1px solid #666;display:grid;place-items:center;font-weight:700;background:#fff}
+.fp .errc .st.ok{color:#0a0}
+.fp .errc .st.bad{color:#d00;background:#ffe5e5}
+.fp .errc .src{background:#fff;border:1px solid #888;height:34px;font-size:11px;padding:2px;overflow:hidden;width:100%}
+.fp .clu{border:3px solid #a57c52;border-radius:4px;background:rgba(231,214,190,.45)}
+.fp .tabc{border:1px solid #8a8a8a;background:#ececec}
+.fp .tabh{display:flex;gap:2px;position:absolute;top:-25px;left:6px}
+.fp .tabh b{font-weight:400;border:1px solid #8a8a8a;border-bottom:none;border-radius:4px 4px 0 0;background:#d7d7d7;padding:3px 12px;cursor:pointer;font-size:12px;height:25px}
+.fp .tabh b.on{background:#ececec;font-weight:700}
+.fp table.tbl{border-collapse:collapse;background:#fff;font:11px Tahoma,sans-serif}
+.fp table.tbl td,.fp table.tbl th{border:1px solid #b8b8b8;padding:1px 5px;white-space:nowrap}
+.fp table.tbl th{background:#e4e4e4;font-weight:400}
+.fp .deco{position:absolute;pointer-events:none}
+.fp .ftxt{position:absolute;font-size:12px;white-space:pre;pointer-events:none}
+.fp .ledgrid{display:grid;gap:3px 10px}
+.fp .ledgrid div{display:flex;align-items:center;gap:5px;white-space:nowrap;font-size:11px}
+.fp .ledgrid .led{width:16px;height:16px;border-width:1px}
+.fp .arrind{display:flex;gap:3px;align-items:flex-start}
+.fp .arrind .ix{width:30px;height:22px;border:1px solid #7a7a7a;background:#fff;text-align:right;padding:2px 3px}
+.fp .arrind .cells{display:flex;gap:2px;border:2px solid #555;padding:2px;background:#c8c8c8}
+.fp .arrind .cells span{min-width:38px;height:20px;background:#f2f2f2;border:1px solid #888;text-align:right;padding:1px 3px;font-size:11px}
+.fp .chart{background:#000;border:1px solid #555}
+.fp .glow,.bd .glow{outline:3px solid rgba(255,170,0,.85);outline-offset:3px;border-radius:4px;animation:pulse 1.4s ease-in-out 3}
+@keyframes pulse{50%{outline-color:rgba(255,170,0,.15)}}
+
+/* 方塊圖物件 */
+.bd .nm{font:10px Tahoma,"Microsoft JhengHei UI",sans-serif;fill:#6b6b6b}
+.bd .lb{font:11px Tahoma,"Microsoft JhengHei UI",sans-serif;fill:#111}
+.bd .gl{font:bold 12px Tahoma,sans-serif;fill:#3b3000;text-anchor:middle;dominant-baseline:central}
+.bd .tt{font:bold 9px Tahoma,sans-serif;text-anchor:middle;dominant-baseline:central}
+.bd .vtag rect{fill:#fffbd1;stroke:#a08a00}
+.bd .vtag text{font:10px Consolas,monospace;fill:#222;dominant-baseline:central}
+.bd .dim{opacity:.28}
+.bd .newg rect.hlb{fill:none;stroke:#ff9d00;stroke-width:3;stroke-dasharray:5 3}
+.bd .free rect{fill:#fff9c4;stroke:#d8c96a}
+.bd .free text{font:11px "Microsoft JhengHei UI",Tahoma,sans-serif;fill:#333}
+.bd g.node{cursor:help}
+.lvtip{position:fixed;z-index:50;background:#1d2330;color:#fff;font-size:12px;padding:6px 9px;border-radius:6px;max-width:320px;pointer-events:none;line-height:1.5}
+.lvtip b{color:#ffd76a}

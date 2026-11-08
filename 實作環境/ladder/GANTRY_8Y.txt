@@ -1,0 +1,501 @@
+﻿GANTRY_8Y instruction list for FX3S-20MT/ES (same content as GANTRY_8Y.csv)
+Step  Instruction  Operands
+
+
+===== P1 初始化 | P1  INITIALIZE =====
+; FX3U 的 D200～D511、FX3S 的 D128～D255 與 S0～S127 都斷電保持。開機先清掉，否則上次的步序會和 S0 同時動作 | Latched on FX3U: D200-D511. On FX3S: D128-D255, S0-S127. Clear them at power-up, or the old step runs together with S0
+    0  LD      M8002
+    1  ZRST    D200 D254
+    6  ZRST    S0 S59
+   11  SET     S0
+; 參數為 0 時填預設值 | Default parameters when they are 0
+   13  LD      M8002
+   14  AND=    D100 K0
+   19  MOV     K5 D100
+   24  LD      M8002
+   25  AND=    D101 K0
+   30  MOV     K5 D101
+   35  LD      M8002
+   36  AND=    D102 K0
+   41  MOV     K50 D102
+
+===== P2 HMI 命令轉成一掃描脈衝。FX3S-20M 沒有啟動、停止、復歸的輸入點 | P2  HMI commands to one scan pulses. FX3S-20M has no input points for start, stop, reset =====
+; 編程協定只讀寫 D。D106 位元 0～4 對應 M100～M104，收到一次就清掉 | The programming protocol only reads and writes D. Bits 0-4 of D106 are M100-M104, taken once
+   46  LD>     D106 K0
+   51  MOV     D106 K2M100
+   56  MOV     K0 D106
+   61  LD      M100
+   62  PLS     M6
+   64  LD      M101
+   65  PLS     M7
+   67  LD      M103
+   68  PLS     M8
+   70  LD      M102
+   71  PLS     M9
+; HMI 脈衝命令取完邊緣後在這裡清除 | HMI pulses are cleared here after the edge is taken
+   73  LD      M100
+   74  RST     M100
+   75  LD      M101
+   76  RST     M101
+   77  LD      M102
+   78  RST     M102
+   79  LD      M103
+   80  RST     M103
+; 計數清除 | Count clear
+   81  LD      M104
+   82  RST     C0
+   84  RST     C1
+   86  RST     M104
+
+===== P3 模式與安全 | P3  MODE AND SAFETY =====
+; M2 急停（X13 是常閉）、M4 手動模式（X10 OFF） | M2 emergency stop (X13 is NC), M4 manual mode
+   87  LDI     X013
+   88  OUT     M2
+   89  LDI     X010
+   90  OUT     M4
+; 急停是異常碼 1，只保留第一個發生的異常碼 | Emergency stop is an alarm with code 1, only the first code is kept
+   91  LD      M2
+   92  AND=    D220 K0
+   97  MOV     K1 D220
+  102  LD      M2
+  103  SET     M3
+; M14 開始原點：HMI M102，或未原點時下復歸命令。只能從 S0 且無異常 | M14 start homing: HMI M102, or reset button when not homed. Only from S0 and without alarm
+  104  LD      M8
+  105  ANI     M20
+  106  OR      M9
+  107  ANI     M3
+  108  ANI     M2
+  109  AND     S0
+  110  OUT     M14
+; M16 開始自動：自動模式、已原點、無異常、在 S0 | M16 start auto: auto mode, homed, no alarm, in S0
+  111  LD      M6
+  112  AND     X010
+  113  AND     M20
+  114  ANI     M3
+  115  ANI     M2
+  116  AND     S0
+  117  OUT     M16
+; 異常復歸：急停要先放開 | Alarm reset needs the emergency stop released
+  118  LD      M8
+  119  AND     M3
+  120  ANI     M2
+  121  RST     M3
+  122  MOV     K0 D220
+; 異常中：清除全部步序與自動輸出 | In alarm: clear every step and auto output
+  127  LD      M3
+  128  ZRST    S0 S59
+  133  ZRST    M50 M60
+  138  RST     M0
+  139  RST     M1
+  140  RST     M20
+  141  RST     M21
+; 異常解除：回 S0 待機，要重新原點 | Alarm released: wait in S0, homing is needed again
+  142  LD      M3
+  143  PLF     M15
+  145  LD      M15
+  146  SET     S0
+; 循環停止：按停止、切手動、或到達目標次數 | Cycle stop: stop key, mode switch, or target count reached
+  148  LD      M7
+  149  AND     M0
+  150  SET     M1
+  151  LD      M0
+  152  ANI     X010
+  153  SET     M1
+  154  LD      M0
+  155  AND>    D103 K0
+  160  AND>=   D212 D103
+  165  SET     M1
+
+===== P4 原點復歸（S0、S10～S13） | P4  HOMING (S0, S10-S13) =====
+; S0 待機 | S0 stand-by
+  166  STL     S0
+  167  LD      M14
+  168  RST     M20
+  169  SET     M21
+  170  SET     S10
+  172  LD      M16
+  173  SET     M0
+  174  SET     S20
+; S10 輸出全關、吸盤關 | S10 all outputs off, vacuum off
+  176  STL     S10
+  177  ZRST    M50 M60
+  182  LD      M8000
+  183  SET     S11
+; S11 兩邊氣缸上升（Y3 同時驅動兩邊） | S11 both cylinders up (Y3 drives both)
+  185  STL     S11
+  186  OUT     M53
+  187  LD      X006
+  188  AND     X011
+  189  SET     S12
+; S12 左龍門回後側、右龍門回前側，同時進行 | S12 left to rear (X1), right to front (X2), both at once
+  191  STL     S12
+  192  LDI     X001
+  193  OUT     M51
+  194  LDI     X002
+  195  OUT     M57
+  196  LD      X001
+  197  AND     X002
+  198  SET     S13
+; S13 原點完成 | S13 homed
+  200  STL     S13
+  201  SET     M20
+  202  RST     M21
+  203  LD      M8000
+  204  SET     S0
+
+===== P5 同步搬運：兩座龍門一起動作（S20～S28） | P5  SYNCHRONOUS TRANSFER: both gantries move together (S20-S28) =====
+; S20 等料：任一端有料就開始，另一邊空跑一趟 | S20 wait: start when either end has a part, the other side runs empty
+  206  STL     S20
+  207  LD      X004
+  208  OR      X005
+  209  AND     X002
+  210  AND     X001
+  211  AND     X011
+  212  AND     X006
+  213  ANI     M1
+  214  SET     S21
+; S21 兩邊下降取料，記下哪一邊真的有料 | S21 both down to pick, remember which side has a part
+  216  STL     S21
+  217  OUT     M54
+  218  LD      X004
+  219  SET     M24
+  220  LD      X005
+  221  SET     M25
+  222  LD      X012
+  223  AND     X007
+  224  SET     S22
+; S22 吸盤開，等 D100 | S22 vacuum on, wait D100
+  226  STL     S22
+  227  SET     M55
+  228  OUT     T0 D100
+  231  LD      T0
+  232  SET     S23
+; S23 兩邊上升 | S23 both up
+  234  STL     S23
+  235  OUT     M53
+  236  LD      X011
+  237  AND     X006
+  238  SET     S24
+; S24 交叉移動：右往後、左往前，各自碰到感測器停 | S24 cross over: right to rear, left to front, each stops at its sensor
+  240  STL     S24
+  241  LDI     X003
+  242  OUT     M56
+  243  LDI     X000
+  244  OUT     M50
+  245  LD      X003
+  246  AND     X000
+  247  SET     S25
+; S25 兩邊下降放料 | S25 both down to place
+  249  STL     S25
+  250  OUT     M54
+  251  LD      X012
+  252  AND     X007
+  253  SET     S26
+; S26 吸盤關，等 D101 | S26 vacuum off, wait D101
+  255  STL     S26
+  256  RST     M55
+  257  OUT     T1 D101
+  260  LD      T1
+  261  SET     S27
+; S27 兩邊上升 | S27 both up
+  263  STL     S27
+  264  OUT     M53
+  265  LD      X011
+  266  AND     X006
+  267  SET     S28
+; S28 回原點：右回前、左回後，有料的一邊才計數 | S28 back home: right to front, left to rear, count only the side that carried a part
+  269  STL     S28
+  270  LDI     X002
+  271  OUT     M57
+  272  LDI     X001
+  273  OUT     M51
+  274  LD      X002
+  275  AND     X001
+  276  AND     M24
+  277  OUT     C0 K32767
+  280  LD      X002
+  281  AND     X001
+  282  AND     M25
+  283  OUT     C1 K32767
+  286  LD      X002
+  287  AND     X001
+  288  SET     S20
+  290  RET     
+; 等料且循環停止中：結束自動 | Waiting and a cycle stop pending: leave auto
+  291  LD      M1
+  292  AND     S20
+  293  RST     S20
+  295  RST     M0
+  296  RST     M1
+  297  SET     S0
+; 回到等料時清掉有料記號 | Clear the carried marks back at the wait step
+  299  LD      S20
+  300  RST     M24
+  301  RST     M25
+
+===== P7 手動 | P7  MANUAL =====
+; M5 手動有效：手動模式、非運轉、非原點中、無異常、HMI 通訊正常 | M5 manual allowed: manual mode, not running, not homing, no alarm, HMI link alive
+  302  LD      M4
+  303  ANI     M0
+  304  ANI     M21
+  305  ANI     M3
+  306  ANI     M2
+  307  ANI     T30
+  308  OUT     M5
+; 不有效時清除全部手動命令 | Otherwise every held command is dropped
+  309  LDI     M5
+  310  ZRST    M110 M125
+  315  MOV     K0 D107
+  320  MOV     K0 D254
+; D107 變動時才搬到 M110～M125。GX Works2 直接改 M 也有效，不會被蓋掉 | D107 reaches M110-M125 only when it changes, so GX Works2 can still write the M bits
+  325  LD<>    D107 D254
+  330  MOV     D107 K4M110
+  335  MOV     D107 D254
+; 手動命令轉到手動輸出繼電器 M70～M85。橫軸點動碰到該方向的定位感測器就停，不會衝過頭 | Commands to the manual output relays M70-M85. An axis jog stops at the sensor of its direction
+  340  LD      M110
+  341  ANI     X000
+  342  OUT     M70
+  343  LD      M111
+  344  ANI     X001
+  345  OUT     M71
+  346  LD      M125
+  347  OUT     M72
+  348  LD      M123
+  349  OR      M113
+  350  OUT     M73
+  351  LD      M122
+  352  OR      M112
+  353  OUT     M74
+  354  LD      M124
+  355  OR      M114
+  356  OUT     M75
+  357  LD      M121
+  358  ANI     X003
+  359  OUT     M76
+  360  LD      M120
+  361  ANI     X002
+  362  OUT     M77
+; 手動動過機構，原點就不再可信 | Anything moved by hand means the machine is no longer at a known home
+  363  LD      M70
+  364  OR      M71
+  365  OR      M73
+  366  OR      M74
+  367  OR      M75
+  368  OR      M76
+  369  OR      M77
+  370  RST     M20
+
+===== P8 逾時監視 | P8  TIMEOUT WATCH =====
+; 受監視的步序：等感測器到位的步。等料和定時步不監視 | Monitored steps: every step that waits for a sensor. Waiting for a part and timed steps are not watched
+  371  LD      S21
+  372  OR      S23
+  373  OR      S24
+  374  OR      S25
+  375  OR      S27
+  376  OR      S28
+  377  OUT     M17
+; 步序號改變時計時器重新開始 | Timers restart when the step number changes
+  378  LD=     D200 D250
+  383  AND     M17
+  384  OUT     T10 D102
+  387  LD=     D202 D252
+  392  LD      S11
+  393  OR      S12
+  394  ANB     
+  395  OUT     T12 D102
+; 兩座龍門共用：橫軸 10、氣缸 11 | Both gantries: axis 10, cylinder 11
+  398  LD      S24
+  399  OR      S28
+  400  AND     T10
+  401  AND=    D220 K0
+  406  MOV     K10 D220
+  411  LD      S21
+  412  OR      S23
+  413  OR      S25
+  414  OR      S27
+  415  AND     T10
+  416  AND=    D220 K0
+  421  MOV     K11 D220
+; 原點復歸 30 | Homing 30
+  426  LD      T12
+  427  AND=    D220 K0
+  432  MOV     K30 D220
+  437  LD      T10
+  438  OR      T12
+  439  SET     M3
+; HMI 心跳：D240 = 0 代表沒有 HMI，3 秒沒變化算斷線（T30） | HMI heartbeat: D240 = 0 means no HMI. 3 s without a change = link lost (T30)
+  440  LD=     D240 D253
+  445  AND>    D240 K0
+  450  OUT     T30 K30
+; 只有手動模式斷線才報 40，因為此時 HMI 是唯一操作站 | Link lost raises code 40 only in manual, where the HMI is the only operator station
+  453  LD      T30
+  454  AND     M4
+  455  PLS     M22
+  457  LD      M22
+  458  AND=    D220 K0
+  463  MOV     K40 D220
+  468  LD      M22
+  469  SET     M3
+; 記下這一掃描的值 | Remember this scan's values
+  470  LD      M8000
+  471  MOV     D200 D250
+  476  MOV     D201 D251
+  481  MOV     D202 D252
+  486  MOV     D240 D253
+
+===== P9 輸出：自動 OR 手動，再加互鎖（唯一驅動 Y 的地方） | P9  OUTPUTS: auto OR manual, then interlocks (only place that drives Y) =====
+; M52 自動時輸送帶：兩端有料、或龍門在帶上作業時暫停 | M52 conveyor in auto: stops for a part at either end and while a gantry works at the belt
+  491  LD      M0
+  492  ANI     X004
+  493  ANI     X005
+  494  ANI     S21
+  495  ANI     S22
+  496  ANI     S23
+  497  ANI     S25
+  498  ANI     S26
+  499  ANI     S27
+  500  OUT     M52
+; Y0 左橫軸往前：氣缸在上，且 Y1 沒動作 | Y0 left forward: cylinder up, not Y1
+  501  LD      M50
+  502  OR      M70
+  503  AND     X006
+  504  AND     X011
+  505  ANI     Y001
+  506  ANI     M3
+  507  ANI     M2
+  508  OUT     Y000
+; Y1 左橫軸往後：氣缸在上，且 Y0 沒動作 | Y1 left rearward: cylinder up, not Y0
+  509  LD      M51
+  510  OR      M71
+  511  AND     X006
+  512  AND     X011
+  513  ANI     Y000
+  514  ANI     M3
+  515  ANI     M2
+  516  OUT     Y001
+; Y2 輸送帶 | Y2 conveyors
+  517  LD      M52
+  518  OR      M72
+  519  ANI     M3
+  520  ANI     M2
+  521  OUT     Y002
+; Y3 兩邊氣缸上升：Y4 沒動作 | Y3 both up: not Y4
+  522  LD      M53
+  523  OR      M73
+  524  ANI     Y004
+  525  ANI     M3
+  526  ANI     M2
+  527  OUT     Y003
+; Y4 兩邊氣缸下降：兩邊都在定位點，且 Y3 沒動作 | Y4 both down: both at a stop point, not Y3
+  528  LD      M54
+  529  OR      M74
+  530  LD      X002
+  531  OR      X003
+  532  ANB     
+  533  LD      X000
+  534  OR      X001
+  535  ANB     
+  536  ANI     Y003
+  537  ANI     M3
+  538  ANI     M2
+  539  OUT     Y004
+; Y5 兩邊吸盤一起動作 | Y5 both vacuums together
+  540  LD      M55
+  541  OR      M75
+  542  ANI     M3
+  543  ANI     M2
+  544  OUT     Y005
+; Y6 右橫軸往後：氣缸在上，且 Y7 沒動作 | Y6 right rearward: cylinder up, not Y7
+  545  LD      M56
+  546  OR      M76
+  547  AND     X006
+  548  AND     X011
+  549  ANI     Y007
+  550  ANI     M3
+  551  ANI     M2
+  552  OUT     Y006
+; Y7 右橫軸往前：氣缸在上，且 Y6 沒動作 | Y7 right forward: cylinder up, not Y6
+  553  LD      M57
+  554  OR      M77
+  555  AND     X006
+  556  AND     X011
+  557  ANI     Y006
+  558  ANI     M3
+  559  ANI     M2
+  560  OUT     Y007
+
+===== P10 HMI 狀態。FX3S-20M 沒有指示燈和蜂鳴器輸出，狀態都由 LabVIEW 顯示 | P10  HMI STATUS. FX3S-20M has no lamp or buzzer output, LabVIEW shows the state =====
+; 狀態位元 M200～M205 | Status bits M200-M205
+  561  LD      M0
+  562  OUT     M200
+  563  LD      M4
+  564  OUT     M201
+  565  LD      M20
+  566  OUT     M202
+  567  LD      M3
+  568  OUT     M203
+  569  LD      M2
+  570  OUT     M204
+  571  LD      M1
+  572  OUT     M205
+; 步序號：0 代表該組沒有作用中的步 | Step numbers: 0 = no step of that group is active
+  573  LD      M8000
+  574  MOV     K0 D200
+  579  MOV     K0 D201
+  584  MOV     K0 D202
+; 左龍門步序顯示和右龍門相同的動作（D200＋20） | The left step shows the same action (D200 + 20)
+  589  LD      S20
+  590  MOV     K20 D200
+  595  LD      S21
+  596  MOV     K21 D200
+  601  LD      S22
+  602  MOV     K22 D200
+  607  LD      S23
+  608  MOV     K23 D200
+  613  LD      S24
+  614  MOV     K24 D200
+  619  LD      S25
+  620  MOV     K25 D200
+  625  LD      S26
+  626  MOV     K26 D200
+  631  LD      S27
+  632  MOV     K27 D200
+  637  LD      S28
+  638  MOV     K28 D200
+  643  LD>     D200 K0
+  648  ADD     D200 K20 D201
+  655  LD      S10
+  656  MOV     K10 D202
+  661  LD      S11
+  662  MOV     K11 D202
+  667  LD      S12
+  668  MOV     K12 D202
+  673  LD      S13
+  674  MOV     K13 D202
+; 計數與 I/O 字。D231 的位元 8、9、10 是左氣缸下降、上升、左吸盤，LabVIEW 位址不變。D212 取兩邊計數較小者 | Counts, I/O words. Bits 8-10 of D231 stay left down, up, vacuum for LabVIEW. D212 = the smaller count
+  679  LD      M8000
+  680  MOV     C0 D210
+  685  MOV     C1 D211
+  690  MOV     K4X000 D230
+  695  MOV     K2Y000 K2M300
+  700  LD      Y004
+  701  OUT     M308
+  702  LD      Y003
+  703  OUT     M309
+  704  LD      Y005
+  705  OUT     M310
+  706  LD      M8000
+  707  MOV     K4M300 D231
+  712  MOV     K2M200 D232
+  717  LD<=    D210 D211
+  722  MOV     D210 D212
+  727  LD>     D210 D211
+  732  MOV     D211 D212
+; PLC 心跳，每秒加 1 | PLC heartbeat, +1 per second
+  737  LD      M8013
+  738  PLS     M23
+  740  LD      M23
+  741  INC     D241
+  744  END     
+
+Total 745 steps
