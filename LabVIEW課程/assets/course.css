@@ -132,3 +132,20 @@ li{margin:3px 0}
 .exam .clock{font-family:var(--mono);font-weight:700;color:#b45309}
 .quiz .qfig .lvwin{margin:6px 0 10px}
 .quiz .qfig pre{background:#f6f8fa;border-radius:6px;padding:8px 10px;font-size:14px;overflow:auto}
+
+/* 手機：表格和 VI 視窗在自己的框裡橫向捲動，整頁不會左右晃 */
+@media (max-width:900px){
+  #main{overflow-x:hidden}
+  table.t{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;font-size:14px}
+  table.t th,table.t td{min-width:96px}
+  .lvhead{flex-wrap:wrap}
+  .lvhead .hint{display:none}
+  .lvbody.split{grid-template-columns:1fr}
+  .lhead h2{font-size:23px}
+  h3{font-size:19px}
+  .stepper .bar .btn{padding:6px 10px}
+  .exam .exbar{position:static}
+  .fig{overflow-x:auto}
+}
+.exam .topicbar{position:static;background:#f6f8fa}
+.exam .topicbar select{font:inherit;padding:4px 6px;max-width:100%}

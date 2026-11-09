@@ -20,7 +20,7 @@
 | 基礎 | 2 資料流、3 型別、4 While Loop、5 Shift Register、6 Case、7 Array/For Loop、8 Cluster/Type Def、9 字串與封包、10 SubVI、11 錯誤處理 | GT_AlarmText、GT_StepText、GT_Status.ctl、GT_Cmd.ctl、FX_Sum、FX_ReadFrame、FX_WriteFrame、FX_Check |
 | 通訊 | 12 VISA、13 FX_ReadD、14 FX_WriteD | FX_Open、FX_ReadD、FX_WriteD |
 | 專案 | 15 GT_Parse/GT_Monitor、16 雙迴圈與 Queue、17 按鈕命令、18 前面板、19 心跳與重連、20 異常紀錄、21 整合測試與上實機 | GT_Parse、GT_Monitor、GT_Log、GT_Main |
-| CLAD 證照 | C1 考試與除錯工具、C2 資料型別、C3 迴圈與時間、C4 Case/Sequence/Event/Formula、C5 陣列與 Cluster、C6 字串與檔案 I/O、C7 模組化與 Reentrancy、C8 Local/Global/FGV/Queue/Notifier/Property Node、C9 設計模式、C10 錯誤處理、C11 Chart 與 Graph、C12 DAQmx 與儀器控制、CX 模擬考與速查表 | 不用存檔；每課 5～13 題練習（多數是看圖題），CX 從 62 題題庫隨機抽 40 題、60 分鐘計時 |
+| CLAD 證照 | C1 考試與除錯工具、C2 資料型別、C3 迴圈與時間、C4 Case/Sequence/Event/Formula、C5 陣列與 Cluster、C6 字串與檔案 I/O、C7 模組化與 Reentrancy、C8 Local/Global/FGV/Queue/Notifier/Property Node、C9 設計模式、C10 錯誤處理、C11 Chart 與 Graph、C12 DAQmx 與儀器控制、CX 模擬考與速查表 | 不用存檔；每課 5～13 題練習（多數是看圖題），CX 從 201 題原創題庫隨機抽 40 題、60 分鐘計時，也可依主題練習；附台灣報名與應試注意事項、英文術語與題目句型表 |
 
 第 12 課起要開軟 PLC（在 `實作環境` 資料夾）：
 
