@@ -1,0 +1,593 @@
+﻿AOI_PLC instruction list for FX3S (same content as AOI_PLC.csv)
+Step  Instruction  Operands
+
+
+===== SECTION 1  I/O MAP (only this section changes for the school wiring) =====
+; Physical inputs
+    0  LD      X000
+    1  OUT     M0
+    2  LD      X001
+    3  OUT     M1
+    4  LD      X002
+    5  OUT     M2
+    6  LD      X003
+    7  OUT     M3
+; Sensor image M120-M135 = DI0-15, M136-M139 = DI16-19. Now fed by the machine simulation (M220-M236); replace LD M2xx with LD X0xx for a real sensor
+    8  LD      M220
+    9  OUT     M120
+   10  LD      M221
+   11  OUT     M121
+   12  LD      M222
+   13  OUT     M122
+   14  LD      M223
+   15  OUT     M123
+   16  LD      M224
+   17  OUT     M124
+   18  LD      M225
+   19  OUT     M125
+   20  LD      M226
+   21  OUT     M126
+   22  LD      M227
+   23  OUT     M127
+   24  LD      M228
+   25  OUT     M128
+   26  LD      M229
+   27  OUT     M129
+   28  LD      M230
+   29  OUT     M130
+   30  LD      M231
+   31  OUT     M131
+   32  LD      M232
+   33  OUT     M132
+   34  LD      M233
+   35  OUT     M133
+   36  LD      M234
+   37  OUT     M134
+   38  LD      M235
+   39  OUT     M135
+   40  LD      M236
+   41  OUT     M136
+   42  LD      M0
+   43  OUT     M137
+   44  LD      M1
+   45  OUT     M138
+   46  LD      M2
+   47  OUT     M139
+; Physical outputs: M100-M111 = DO0-11
+   48  LD      M100
+   49  OUT     Y000
+   50  LD      M101
+   51  OUT     Y001
+   52  LD      M102
+   53  OUT     Y002
+   54  LD      M103
+   55  OUT     Y003
+   56  LD      M110
+   57  OUT     Y004
+   58  LD      M109
+   59  OUT     Y005
+   60  LD      M108
+   61  OUT     Y006
+   62  LD      M111
+   63  OUT     Y007
+
+===== SECTION 2  CONTROL =====
+; Power-up: clear working data, fill defaults when D530-D532 are 0
+   64  LD      M8002
+   65  SET     M198
+   66  MOV     K0 D100
+   71  MOV     K0 D510
+   76  MOV     K0 D511
+   81  MOV     K0 D550
+   86  MOV     K10 D300
+   91  MOV     K0 D301
+   96  MOV     K0 D306
+  101  MOV     K0 D310
+  106  MOV     K0 D311
+  111  MOV     K0 D312
+  116  MOV     K0 D313
+  121  MOV     K550 D314
+  126  MOV     K0 D400
+  131  MOV     K0 D401
+  136  MOV     K0 D402
+  141  MOV     K0 D403
+  146  MOV     K1001 D25
+  151  LD      M8002
+  152  AND=    D530 K0
+  157  MOV     K60 D530
+  162  LD      M8002
+  163  AND=    D531 K0
+  168  MOV     K50 D531
+  173  LD      M8002
+  174  AND=    D532 K0
+  179  MOV     K20 D532
+; Every scan: speed, fault bits, step timer T0 (restarts when the step changes)
+  184  LD      M8000
+  185  MOV     D530 D315
+  190  MOV     D550 K2M190
+  195  CMP     D300 D20 M150
+  202  MOV     D300 D20
+  207  LD      M151
+  208  OUT     T0 K32767
+; Step flags M160-M173
+  211  LD=     D300 K10
+  216  OUT     M160
+  217  LD=     D300 K20
+  222  OUT     M161
+  223  LD=     D300 K30
+  228  OUT     M162
+  229  LD=     D300 K40
+  234  OUT     M163
+  235  LD=     D300 K50
+  240  OUT     M164
+  241  LD=     D300 K60
+  246  OUT     M165
+  247  LD=     D300 K70
+  252  OUT     M166
+  253  LD=     D300 K80
+  258  OUT     M167
+  259  LD=     D300 K90
+  264  OUT     M168
+  265  LD=     D300 K100
+  270  OUT     M169
+  271  LD=     D300 K110
+  276  OUT     M170
+  277  LD=     D300 K120
+  282  OUT     M171
+  283  LD=     D300 K900
+  288  OUT     M172
+  289  LD=     D300 K910
+  294  OUT     M173
+; b1 running (steps 40-120), emergency stop M192 = X3 open or D550 bit0
+  295  LD>=    D300 K40
+  300  AND<=   D300 K120
+  305  OUT     M141
+  306  LDI     M3
+  307  OR      M190
+  308  OUT     M192
+  309  LD      M192
+  310  OUT     M145
+  311  LD      M134
+  312  OUT     M144
+; Commands: button edge OR D100, then D100 goes back to 0
+  313  LD      M0
+  314  PLS     M4
+  316  LD      M1
+  317  PLS     M5
+  319  LD      M2
+  320  PLS     M6
+  322  LD=     D100 K1
+  327  OR      M4
+  328  OUT     M10
+  329  LD=     D100 K2
+  334  OR      M5
+  335  OUT     M11
+  336  LD=     D100 K3
+  341  OR      M6
+  342  OUT     M12
+  343  LD=     D100 K4
+  348  OUT     M13
+  349  LD=     D100 K5
+  354  OUT     M14
+  355  LD      M8000
+  356  MOV     K0 D100
+; Stop request M21 (b3): finish this part, then Idle
+  361  LD      M11
+  362  AND     M141
+  363  SET     M21
+  364  LD      M162
+  365  OR      M172
+  366  RST     M21
+  367  LD      M21
+  368  OUT     M143
+; NG bin commands
+  369  LD      M13
+  370  MOV     K0 D313
+  375  LD      M14
+  376  MOV     D532 D313
+; Step 10 Init: all cylinders off, wait for retract and safety
+  381  LD      M160
+  382  RST     M101
+  383  RST     M102
+  384  RST     M103
+  385  RST     M106
+  386  RST     M140
+  387  LD      M160
+  388  AND     M131
+  389  AND     M133
+  390  ANI     M192
+  391  AND     M123
+  392  MOV     K20 D300
+; Step 20 Purge: belt 6 s with the stopper down
+  397  LD      M161
+  398  AND>=   T0 K60
+  403  MOV     K30 D300
+; Step 30 Idle: wait for start
+  408  LD      M162
+  409  AND     M10
+  410  ANI     M134
+  411  AND=    D301 K0
+  416  MOV     K40 D300
+; Step 40 RequestPart: DO4 pulse 0.3 s, wait for entry sensor
+  421  LD      M163
+  422  AND<    T0 K3
+  427  ANI     M192
+  428  OUT     M104
+  429  LD      M163
+  430  AND     M124
+  431  MOV     K50 D300
+; Step 50 ToStopper: stopper up, belt runs
+  436  LD      M164
+  437  SET     M101
+  438  LD      M164
+  439  AND     M125
+  440  MOV     K60 D300
+; Step 60 Clamp: belt stops, clamp extends
+  445  LD      M165
+  446  SET     M102
+  447  LD      M165
+  448  AND     M130
+  449  MOV     K70 D300
+; Step 70 Inspect: light on, D306 = id, b0 only after D511 = 0 (handshake item 5)
+  454  LD      M166
+  455  SET     M106
+  456  MOV     D401 D306
+  461  LD      M166
+  462  AND=    D511 K0
+  467  SET     M140
+  468  LD      M166
+  469  AND     M140
+  470  AND=    D511 K1
+  475  OUT     M22
+  476  LD      M22
+  477  LD=     D510 K1
+  482  OR=     D510 K2
+  487  ANB     
+  488  OUT     M23
+  489  LD      M23
+  490  MOV     D510 D403
+  495  RST     M140
+  496  MOV     K80 D300
+  501  LD      M22
+  502  AND=    D510 K3
+  507  OUT     M28
+  508  LD      M22
+  509  ANI     M23
+  510  ANI     M28
+  511  OUT     M24
+; Step 80 Release: light off, clamp and stopper back
+  512  LD      M167
+  513  RST     M106
+  514  RST     M102
+  515  RST     M101
+  516  LD      M167
+  517  AND     M131
+  518  AND     M129
+  519  MOV     K90 D300
+; Step 90 ToSort: belt until sort sensor, NG goes to 100, OK to 110
+  524  LD      M168
+  525  AND     M126
+  526  AND=    D403 K2
+  531  MOV     K100 D300
+  536  LD      M168
+  537  AND     M126
+  538  AND=    D403 K1
+  543  MOV     K110 D300
+; Step 100 PushNG: pusher out, back when extended, leave when retracted
+  548  LD      M169
+  549  ANI     M151
+  550  SET     M103
+  551  LD      M169
+  552  AND     M132
+  553  RST     M103
+  554  LD      M169
+  555  AND     M151
+  556  AND     M133
+  557  ANI     M103
+  558  MOV     K120 D300
+; Step 110 ToExit: belt and offer until the exit sensor turned on and off again
+  563  LD      M170
+  564  AND     M127
+  565  SET     M25
+  566  LD      M170
+  567  AND     M25
+  568  ANI     M127
+  569  MOV     K120 D300
+; Step 120 Done: count once, then choose the next step
+  574  LD      M171
+  575  RST     M25
+  576  INC     D310
+  579  LD      M171
+  580  AND=    D403 K1
+  585  INC     D311
+  588  LD      M171
+  589  AND=    D403 K2
+  594  INC     D312
+  597  LD      M171
+  598  AND     M21
+  599  MOV     K30 D300
+  604  LD      M171
+  605  ANI     M21
+  606  ANI     M134
+  607  MOV     K40 D300
+  612  LD      M171
+  613  ANI     M21
+  614  AND     M134
+  615  OUT     M26
+; Step 900 Error: end the inspection request, go to AlarmWait
+  616  LD      M172
+  617  RST     M140
+  618  MOV     K910 D300
+; Step 910 AlarmWait: reset works only when the cause is gone (M27 off)
+  623  LD      M173
+  624  AND     M12
+  625  ANI     M27
+  626  MOV     K0 D301
+  631  MOV     K10 D300
+; Outputs made from steps
+  636  LD      M161
+  637  OR      M164
+  638  OR      M168
+  639  OR      M170
+  640  ANI     M192
+  641  OUT     M100
+  642  LD      M161
+  643  OR      M170
+  644  ANI     M192
+  645  OUT     M105
+  646  LD      M141
+  647  ANI     M192
+  648  OUT     M110
+  649  LD      M162
+  650  ANI     M192
+  651  OUT     M109
+  652  LD      M172
+  653  OR      M173
+  654  ANI     M192
+  655  OUT     M108
+  656  OUT     M111
+; Emergency stop: every held output off at once
+  657  LD      M192
+  658  RST     M101
+  659  RST     M102
+  660  RST     M103
+  661  RST     M106
+
+===== SECTION 3  ALARMS (only the first code is kept: each rung checks D301 = 0) =====
+; Heartbeat: T1 runs in steps 40-120, T2 always (used to know the cause is gone)
+  662  LD      M8000
+  663  CMP     D520 D22 M153
+  670  MOV     D520 D22
+  675  LD      M154
+  676  AND     M141
+  677  OUT     T1 K20
+  680  LD      M154
+  681  OUT     T2 K20
+; 8001 emergency stop
+  684  LD      M192
+  685  AND=    D301 K0
+  690  MOV     K8001 D301
+; 8004 low air
+  695  LD<     D314 K450
+  700  AND=    D301 K0
+  705  MOV     K8004 D301
+; 8101 NG bin full (after Done, or Start while full)
+  710  LD      M162
+  711  AND     M10
+  712  AND     M134
+  713  OR      M26
+  714  AND=    D301 K0
+  719  MOV     K8101 D301
+; 9002 / 9003 / 9001 cylinder timeouts
+  724  LD      M160
+  725  AND>=   T0 K20
+  730  ANI     M131
+  731  AND=    D301 K0
+  736  MOV     K9002 D301
+  741  LD      M160
+  742  AND>=   T0 K20
+  747  ANI     M133
+  748  AND=    D301 K0
+  753  MOV     K9003 D301
+  758  LD      M165
+  759  AND>=   T0 K10
+  764  ANI     M130
+  765  AND=    D301 K0
+  770  MOV     K9002 D301
+  775  LD      M167
+  776  AND>=   T0 K10
+  781  ANI     M131
+  782  AND=    D301 K0
+  787  MOV     K9002 D301
+  792  LD      M167
+  793  AND>=   T0 K10
+  798  ANI     M129
+  799  AND=    D301 K0
+  804  MOV     K9001 D301
+  809  LD      M169
+  810  AND>=   T0 K10
+  815  AND=    D301 K0
+  820  MOV     K9003 D301
+; 9004 part did not arrive: step 40 5 s, 50 6 s, 90 4 s, 110 4 s
+  825  LD      M163
+  826  AND>=   T0 K50
+  831  LD      M164
+  832  AND>=   T0 K60
+  837  ORB     
+  838  LD      M168
+  839  AND>=   T0 K40
+  844  ORB     
+  845  LD      M170
+  846  AND>=   T0 K40
+  851  ORB     
+  852  AND=    D301 K0
+  857  MOV     K9004 D301
+; 9005 inspection timeout (D531 x 0.1 s)
+  862  LD      M166
+  863  AND>=   T0 D531
+  868  AND=    D301 K0
+  873  MOV     K9005 D301
+; 9006 heartbeat timeout
+  878  LD      T1
+  879  AND=    D301 K0
+  884  MOV     K9006 D301
+; 9007 illegal inspection result
+  889  LD      M24
+  890  AND=    D301 K0
+  895  MOV     K9007 D301
+; 9008 servo alarm reported by the host (D510 = 3)
+  900  LD      M28
+  901  AND=    D301 K0
+  906  MOV     K9008 D301
+; Any alarm sends the machine to step 900
+  911  LD>     D301 K0
+  916  AND<    D300 K900
+  921  MOV     K900 D300
+  926  LD>     D301 K0
+  931  OUT     M142
+; M27 = alarm cause still present
+  932  LD      M192
+  933  OR<     D314 K450
+  938  LD=     D301 K8101
+  943  AND     M134
+  944  ORB     
+  945  LD=     D301 K9002
+  950  AND     M191
+  951  ORB     
+  952  LD=     D301 K9006
+  957  AND     T2
+  958  ORB     
+  959  OUT     M27
+
+===== SECTION 4  MACHINE SIMULATION (M198 OFF switches the whole section off) =====
+; 100 ms tick, belt travel D32 = speed x 2.5 (x5, then shift right one bit through K4M250)
+  960  LD      M8012
+  961  PLS     M240
+  963  LD      M198
+  964  ADD     D315 D315 D30
+  971  ADD     D30 D30 D31
+  978  ADD     D31 D315 D31
+  985  MOV     D31 K4M250
+  990  MOV     K4M251 D32
+; New part 0.3 s after the request pulse starts (falling edge of DO4)
+  995  LD      M104
+  996  PLF     M242
+  998  LD      M242
+  999  AND     M198
+ 1000  AND     M135
+ 1001  MOV     K1 D400
+ 1006  MOV     D25 D401
+ 1011  MOV     K0 D402
+ 1016  MOV     K0 D403
+ 1021  INC     D25
+; Part position
+ 1024  LD      M240
+ 1025  AND     M198
+ 1026  AND     M100
+ 1027  ANI     M192
+ 1028  ANI     M102
+ 1029  AND=    D400 K1
+ 1034  ADD     D402 D32 D402
+ 1041  LD      M198
+ 1042  AND     M101
+ 1043  AND>=   D402 K4000
+ 1048  MOV     K4000 D402
+ 1053  LD      M198
+ 1054  AND>=   D402 K9000
+ 1059  MOV     K9000 D402
+; Safety and belt sensors
+ 1064  LD      M198
+ 1065  ANI     M192
+ 1066  OUT     M220
+ 1067  LD      M198
+ 1068  OUT     M221
+ 1069  OUT     M222
+ 1070  OUT     M235
+ 1071  OUT     M236
+ 1072  LD      M198
+ 1073  AND>=   D314 K450
+ 1078  OUT     M223
+ 1079  LD      M198
+ 1080  AND=    D400 K1
+ 1085  AND>=   D402 K0
+ 1090  AND<=   D402 K400
+ 1095  OUT     M224
+ 1096  LD      M198
+ 1097  AND=    D400 K1
+ 1102  AND>=   D402 K3950
+ 1107  AND<=   D402 K4050
+ 1112  OUT     M225
+ 1113  LD      M198
+ 1114  AND=    D400 K1
+ 1119  AND>=   D402 K6850
+ 1124  AND<=   D402 K7150
+ 1129  OUT     M226
+ 1130  LD      M198
+ 1131  AND=    D400 K1
+ 1136  AND>=   D402 K8900
+ 1141  OUT     M227
+; Cylinders: stopper 0.2 s, clamp 0.3 s, pusher 0.3 s. D550 bit1 blocks the clamp extended sensor
+ 1142  LD      M198
+ 1143  AND     M101
+ 1144  OUT     T10 K2
+ 1147  LD      M198
+ 1148  ANI     M101
+ 1149  OUT     T11 K2
+ 1152  LD      M198
+ 1153  AND     M102
+ 1154  OUT     T12 K3
+ 1157  LD      M198
+ 1158  ANI     M102
+ 1159  OUT     T13 K3
+ 1162  LD      M198
+ 1163  AND     M103
+ 1164  OUT     T14 K3
+ 1167  LD      M198
+ 1168  ANI     M103
+ 1169  OUT     T15 K3
+ 1172  LD      T10
+ 1173  OUT     M228
+ 1174  LD      T11
+ 1175  OUT     M229
+ 1176  LD      T12
+ 1177  ANI     M191
+ 1178  OUT     M230
+ 1179  LD      T13
+ 1180  OUT     M231
+ 1181  LD      T14
+ 1182  OUT     M232
+ 1183  LD      T15
+ 1184  OUT     M233
+; Push: part in 6750-7250 goes into the NG bin
+ 1185  LD      M132
+ 1186  PLS     M241
+ 1188  LD      M241
+ 1189  AND     M198
+ 1190  AND=    D400 K1
+ 1195  AND>=   D402 K6750
+ 1200  AND<=   D402 K7250
+ 1205  MOV     K0 D400
+ 1210  INC     D313
+; Exit: at the exit with offer ON for 0.5 s, the part is taken
+ 1213  LD      M198
+ 1214  AND     M127
+ 1215  AND     M105
+ 1216  AND     M136
+ 1217  OUT     T16 K5
+ 1220  LD      T16
+ 1221  MOV     K0 D400
+ 1226  MOV     K0 D402
+; NG bin full
+ 1231  LD      M198
+ 1232  AND>=   D313 D532
+ 1237  OUT     M234
+
+===== SECTION 5  WORDS FOR LABVIEW =====
+ 1238  LD      M8000
+ 1239  MOV     K2M140 D302
+ 1244  MOV     K4M120 D303
+ 1249  MOV     K1M136 D304
+ 1254  MOV     K4M100 D305
+ 1259  END     
+
+Total 1260 steps

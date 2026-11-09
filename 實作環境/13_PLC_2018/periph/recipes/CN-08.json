@@ -1,0 +1,21 @@
+{
+  "recipe": "CN-08",
+  "description": "8 pin 連接器",
+  "conveyor_speed_pct": 60,
+  "mm_per_px": 0.05,
+  "motion_speed_mm_s": 300,
+  "pins_x_mm": 110.0,
+  "pins_count": 8,
+  "pins_pitch_mm": 1.00,
+  "pins_pitch_tol_mm": 0.08,
+  "pins_threshold": 125,
+  "width_x_mm": 150.0,
+  "width_nominal_mm": 10.00,
+  "width_tol_mm": 0.10,
+  "width_threshold": 105,
+  "surface_x_mm": 190.0,
+  "surface_dark_level": 120,
+  "surface_max_dark_px": 30,
+  "roi_row_start": 80,
+  "roi_row_end": 160
+}
