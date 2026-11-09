@@ -150,12 +150,15 @@ function exam(c,cfg){
   const box=document.createElement('div');box.className='exam';c.appendChild(box);
   const KEYB='gantry-lv-exam-best';
   let best=null;try{best=JSON.parse(localStorage.getItem(KEYB)||'null');}catch(e){}
-  function start(){
-    const bank=cfg.bank.slice();for(let i=bank.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[bank[i],bank[j]]=[bank[j],bank[i]];}
-    const qs=bank.slice(0,Math.min(cfg.n,bank.length)).map(shuffled);
+  function start(topic){
+    if(typeof topic!=='string') topic='';
+    const pool=topic?cfg.bank.filter(q=>q.topic===topic):cfg.bank;
+    const bank=pool.slice();for(let i=bank.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[bank[i],bank[j]]=[bank[j],bank[i]];}
+    const qs=(topic?bank:bank.slice(0,Math.min(cfg.n,bank.length))).map(shuffled);
     const ans=new Array(qs.length).fill(-1);
-    let left=cfg.minutes*60,timer=null;
-    box.innerHTML=`<div class="exbar"><b>模擬考進行中</b><span class="clock"></span><span class="cnt"></span><button class="btn pri sub">交卷</button></div><div class="qs"></div>`;
+    const minutes=topic?Math.ceil(qs.length*1.5):cfg.minutes;
+    let left=minutes*60,timer=null;
+    box.innerHTML=`<div class="exbar"><b>${topic?'主題練習：'+topic:'模擬考進行中'}</b><span class="clock"></span><span class="cnt"></span><button class="btn pri sub">交卷</button></div><div class="qs"></div>`;
     const list=box.querySelector('.qs');
     qs.forEach((q,k)=>{
       const d=document.createElement('div');d.className='quiz';
@@ -178,18 +181,25 @@ function exam(c,cfg){
         if(ans[k]===q.a)ok++;
         d.querySelector('.ex').innerHTML=(ans[k]===q.a?'<b>答對。</b>':(ans[k]<0?'<b>沒作答。</b>':'<b>答錯。</b>'))+' '+(q.ex||'')+(q.topic?` <span class="qd">（${q.topic}）</span>`:'');});
       const pct=Math.round(100*ok/qs.length),pass=pct>=cfg.pass;
-      if(!best||pct>best.pct){best={pct,at:new Date().toLocaleString()};try{localStorage.setItem(KEYB,JSON.stringify(best));}catch(e){}}
-      const used=cfg.minutes*60-left;
+      if(!topic&&(!best||pct>best.pct)){best={pct,at:new Date().toLocaleString()};try{localStorage.setItem(KEYB,JSON.stringify(best));}catch(e){}}
+      const used=minutes*60-left;
       const bar=box.querySelector('.exbar');
-      bar.innerHTML=`<b style="color:${pass?'#0b8a5f':'#b91c1c'}">${timeout?'時間到。':''}得分 ${ok} / ${qs.length}（${pct}%）${pass?'　通過':'　未通過'}（及格 ${cfg.pass}%）</b><span>用時 ${Math.floor(used/60)} 分 ${used%60} 秒</span><button class="btn pri again">再考一次（重新抽題）</button>`;
-      bar.querySelector('.again').onclick=start;
+      bar.innerHTML=`<b style="color:${pass?'#0b8a5f':'#b91c1c'}">${timeout?'時間到。':''}得分 ${ok} / ${qs.length}（${pct}%）${pass?'　通過':'　未通過'}（及格 ${cfg.pass}%）</b><span>用時 ${Math.floor(used/60)} 分 ${used%60} 秒</span><button class="btn menu">回選單</button><button class="btn pri again">${topic?'再練一次':'再考一次（重新抽題）'}</button>`;
+      bar.querySelector('.again').onclick=()=>start(topic);
+      bar.querySelector('.menu').onclick=menu;
       const wrong=[...new Set(qs.filter((q,k)=>ans[k]!==q.a).map(q=>q.topic).filter(Boolean))];
       if(wrong.length){const w=document.createElement('div');w.className='warn';w.innerHTML='<b>要複習的主題</b>'+wrong.join('、');bar.after(w);}
       box.scrollIntoView();
     }
   }
-  box.innerHTML=`<div class="exbar"><span>${cfg.n} 題、${cfg.minutes} 分鐘、及格 ${cfg.pass}%。每次從 ${cfg.bank.length} 題題庫隨機抽題，交卷後才顯示答案和解說。${best?`　你的最佳成績：${best.pct}%（${best.at}）`:''}</span><button class="btn pri go">開始模擬考</button></div>`;
-  box.querySelector('.go').onclick=start;
+  function menu(){
+    const topics=[...new Set(cfg.bank.map(q=>q.topic).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'zh',{numeric:true}));
+    box.innerHTML=`<div class="exbar"><span>${cfg.n} 題、${cfg.minutes} 分鐘、及格 ${cfg.pass}%。每次從 ${cfg.bank.length} 題題庫隨機抽題，交卷後才顯示答案和解說。${best?`　你的最佳成績：${best.pct}%（${best.at}）`:''}</span><button class="btn pri go">開始模擬考</button></div>
+<div class="exbar topicbar"><span>或依主題練習（該主題全部題目）：</span><select class="tp">${topics.map(t=>`<option value="${t}">${t}（${cfg.bank.filter(q=>q.topic===t).length} 題）</option>`).join('')}</select><button class="btn tgo">開始練習</button></div>`;
+    box.querySelector('.go').onclick=()=>start('');
+    box.querySelector('.tgo').onclick=()=>start(box.querySelector('.tp').value);
+  }
+  menu();
 }
 
 /* ---------- 啟動 ---------- */

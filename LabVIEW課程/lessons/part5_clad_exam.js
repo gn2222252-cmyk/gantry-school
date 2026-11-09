@@ -88,6 +88,7 @@ const BANK=[
  {topic:T.hw,q:'序列埠儀器回應的資料總是缺最後一段，最可能的原因？',o:['取樣率太低','終止字元或 byte count 設定錯誤','用了 Differential','沒有 DAQmx'],a:1,ex:'VISA Read 遇到終止字元或讀滿 byte count 就結束。'},
  {topic:T.hw,q:'VISA 資源名稱 "ASRL1::INSTR" 是？',o:['GPIB 位址 1','序列埠 COM1','USB 裝置','網路儀器'],a:1,ex:'ASRL = Asynchronous Serial。'}
 ];
+BANK.push(...(C.CLAD_EXTRA||[]));
 C.CLAD_BANK=BANK;
 
 /* ======================================================================
@@ -100,6 +101,48 @@ body:[
 C.h3('考','q','模擬考'),
 {exam:{bank:BANK,n:40,minutes:60,pass:70}},
 note('作答技巧','① 看圖題先找「迴圈跑幾次」「Case 走哪一頁」，再看通道種類。② 選項有「不一定」「平行」時，想想有沒有資料相依。③ 時間平均每題 1.5 分鐘，不會的先跳過。④ 刪去法：「一定」「永遠」的選項常是錯的，但 While 至少跑一次、Divide 一定輸出浮點這類是真的「一定」。'),
+note('關於題庫','題庫共 '+BANK.length+' 題，全部是依 NI 官方 CLAD 考試主題與常見題型（看方塊圖算結果、選正確敘述、選最適合的架構）自己編寫的原創題。真正的考題受 NI 保密協議保護，網路上號稱「考古題／真題」的洩題站內容不保證正確，也可能讓證照被取消，不要依賴。NI 官網有免費的官方 CLAD Sample Exam（範例考卷），考前一定要做一份，熟悉英文題目的樣子。'),
+C.h3('台','x','在台灣考 CLAD 要注意的事'),
+C.table(['項目','重點'],[
+ ['報名','透過 <b>Pearson VUE</b> 報名：先建立 Pearson VUE 帳號，搜尋 NI（NI 現已併入 Emerson，頁面可能寫 NI – Emerson Test &amp; Measurement），選 CLAD。可選<b>考場應試</b>或 <b>OnVUE 線上監考</b>（在家考）。價格、場次以報名頁顯示為準（舊資料約 129 美元）。'],
+ ['學生優惠','先問老師或系辦：學校有時有 NI 學術合作、校園考試場次或考試券（voucher），會比自己報名便宜。'],
+ ['考試形式','約 40 題選擇題、1 小時、70% 及格（以報名頁公告為準）。<b>考試時沒有 LabVIEW 可以用</b>，全部是看題目和方塊圖截圖作答，所以要練到「看圖就知道結果」。'],
+ ['語言','題目以<b>英文</b>為主，報名時看清楚有沒有中文版可選。本課程題目是中文，考前一定要熟悉下面的英文術語和題目句型。'],
+ ['證件（最重要）','Pearson VUE 要求有照片、簽名、<b>英文姓名</b>的政府證件，而且姓名要和報名時填的英文名<b>完全一致</b>。台灣身分證沒有英文姓名，通常要帶<b>護照</b>。報名時英文名照護照拼法填，考前再到 Pearson VUE 台灣網站確認證件規定。'],
+ ['OnVUE 在家考','要有視訊鏡頭、麥克風、穩定網路、獨立安靜的房間、桌面淨空、只能一個螢幕；考前先跑 Pearson 的系統測試，提早約 30 分鐘報到（拍證件、拍房間）。學校或公司網路常擋監考軟體，建議在家考。考試中不能離開鏡頭、不能出聲唸題。'],
+ ['考場應試','提早 15～30 分鐘到，手機、包包放置物櫃，考場會給可擦寫的筆記板。'],
+ ['版本','報名時選 LabVIEW 20xx（不要選已停產的 NXG）。本課程以 LabVIEW 2018 為準，考試內容在各版本之間差異很小。'],
+ ['效期','CLAD 有效期約 2 年（以官方規定為準），到期前可以重考 CLAD 或直接考 CLD 來延續。']
+]),
+C.h3('英','x','考題常見英文：術語'),
+C.table(['英文','中文／意思','英文','中文／意思'],[
+ ['Front Panel / Block Diagram','前面板／方塊圖','Control / Indicator / Constant','控制項／指示器／常數'],
+ ['Terminal / Node / Wire','端子／節點／連線','Broken Run arrow','斷掉的執行箭頭'],
+ ['Shift Register / Feedback Node','移位暫存器／回饋節點','Tunnel / Auto-indexing','通道／自動索引'],
+ ['Iteration terminal (i) / Count terminal (N)','迴圈計數／次數端子','Conditional terminal','條件端子（停止條件）'],
+ ['Coercion dot','強制轉型點','Representation','數值表示法（I32、DBL…）'],
+ ['Type Def / Strict Type Def','型別定義／嚴格型別定義','Polymorphic','多型（自動適應型別）'],
+ ['Reentrant / Non-reentrant','可重入／不可重入','Connector pane / Icon','接線端子圖／圖示'],
+ ['Race condition','競爭條件','Functional Global Variable','功能型全域變數（FGV）'],
+ ['Queue / Notifier / Semaphore','佇列／通知器／號誌','Event Structure / Event case','事件結構／事件頁'],
+ ['Property Node / Invoke Node','屬性節點／方法節點','Control reference','控制項參照'],
+ ['Error cluster / Merge Errors','錯誤叢集／合併錯誤','Probe / Breakpoint','探針／中斷點'],
+ ['Highlight Execution','顯示執行動畫','Step Into / Over / Out','單步進入／跳過／跳出'],
+ ['Waveform Chart / Graph / XY Graph','波形圖表／波形圖／XY 圖','Finite / Continuous samples','有限／連續取樣'],
+ ['Termination character','終止字元','Mechanical action (Latch / Switch)','機械動作（閂鎖／開關）']
+]),
+C.h3('句','x','考題常見英文：句型'),
+C.table(['英文題目常這樣寫','意思'],[
+ ['What is the value of <i>Result</i> after the VI executes?','VI 執行完後 Result 的值是多少？（看圖算結果）'],
+ ['Which of the following statements is TRUE / FALSE?','下列哪一項敘述「正確」／「錯誤」？（注意 FALSE 題，最容易看錯）'],
+ ['Which of the following best describes …?','下列哪一項最能描述……？'],
+ ['Which design pattern is most appropriate for …?','哪一種設計模式最適合……？'],
+ ['How many times does the loop execute?','迴圈執行幾次？'],
+ ['Which node executes first?','哪一個節點先執行？（沒有資料相依時答案常是「無法確定」）'],
+ ['Which change will fix the broken VI?','怎麼改才能修好斷掉的 VI？'],
+ ['… resulting in the least memory usage / the fastest execution','……記憶體用最少／執行最快的做法']
+]),
+tip('考前一週的安排','① 每天考一次本頁模擬考，錯的主題用「依主題練習」補強。② 做 NI 官方 Sample Exam（英文），把不認識的單字整理到上面的表。③ 考前一天只看速查表和英文術語表，早點睡。'),
 C.h3('查','r','考前速查表'),
 C.table(['主題','一定要記的'],[
  ['資料流','所有輸入到齊才執行；沒有線相連 = 平行、順序不保證'],
