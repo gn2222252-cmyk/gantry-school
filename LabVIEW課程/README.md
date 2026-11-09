@@ -2,7 +2,7 @@
 
 **雙擊 `開始上課.html`**（Edge、Chrome 都可以，不用網路、不用安裝）。
 
-22 堂課，從「LabVIEW 是什麼」一路做到完整的 `GT_Main.vi`：讀 PLC 狀態、送命令、點動、參數、心跳、斷線重連、異常紀錄。另外有 13 堂 **CLAD 證照**課（C1～C12 加模擬考），補齊專案沒用到、但考試會考的知識點。學校 LabVIEW 2018 英文版和家裡的 2026 都適用。
+22 堂課，從「LabVIEW 是什麼」一路做到完整的 `GT_Main.vi`：讀 PLC 狀態、送命令、點動、參數、心跳、斷線重連、異常紀錄。另外有 9 堂 **13_PLC 架構拆解**課（QMH、多迴圈架構、怎麼自己規劃大程式），和 13 堂 **CLAD 證照**課（C1～C12 加模擬考），補齊專案沒用到、但考試會考的知識點。學校 LabVIEW 2018 英文版和家裡的 2026 都適用。
 
 ## 每一課的樣子
 
@@ -20,6 +20,7 @@
 | 基礎 | 2 資料流、3 型別、4 While Loop、5 Shift Register、6 Case、7 Array/For Loop、8 Cluster/Type Def、9 字串與封包、10 SubVI、11 錯誤處理 | GT_AlarmText、GT_StepText、GT_Status.ctl、GT_Cmd.ctl、FX_Sum、FX_ReadFrame、FX_WriteFrame、FX_Check |
 | 通訊 | 12 VISA、13 FX_ReadD、14 FX_WriteD | FX_Open、FX_ReadD、FX_WriteD |
 | 專案 | 15 GT_Parse/GT_Monitor、16 雙迴圈與 Queue、17 按鈕命令、18 前面板、19 心跳與重連、20 異常紀錄、21 整合測試與上實機 | GT_Parse、GT_Monitor、GT_Log、GT_Main |
+| 13_PLC 架構拆解 | A1 全貌與檔案地圖、A2 QMH 從零開始（10 MES.vi）、A3 為什麼變成 4 個迴圈（Queue／Notifier／U32 打包，附資料流模擬）、A4 通訊迴圈與驅動層、A5 檢測迴圈與交握、A6 UI 迴圈與 Exit 流程、A7 MES 迴圈與結束順序、A8 自己規劃大架構（9 步法＋骨架＋練習）、A9 函式速查 | 我的QMH骨架.vi、我的架構骨架.vi；拆解的程式在學校包 `實作環境\13_PLC_2018` |
 | CLAD 證照 | C1 考試與除錯工具、C2 資料型別、C3 迴圈與時間、C4 Case/Sequence/Event/Formula、C5 陣列與 Cluster、C6 字串與檔案 I/O、C7 模組化與 Reentrancy、C8 Local/Global/FGV/Queue/Notifier/Property Node、C9 設計模式、C10 錯誤處理、C11 Chart 與 Graph、C12 DAQmx 與儀器控制、CX 模擬考與速查表 | 不用存檔；每課 5～13 題練習（多數是看圖題），CX 從 201 題原創題庫隨機抽 40 題、60 分鐘計時，也可依主題練習；附台灣報名與應試注意事項、英文術語與題目句型表 |
 
 第 12 課起要開軟 PLC（在 `實作環境` 資料夾）：
