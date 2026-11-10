@@ -318,6 +318,23 @@ C.table(['Selector 型別','規則'],[
  ['Error Cluster','No Error / Error 兩頁，依 status 判斷']
 ]),
 `<p>輸出通道：每一頁都要接，否則通道空心、VI 斷；或通道右鍵 <b>Use Default If Unwired</b>（沒接的頁輸出預設值）。</p>`,
+C.h3('考','q','常見考題：Numeric Control（DBL）= 2.5 接到 Case，跑哪一頁？'),
+`<p>Case 有三頁：<code>1, Default</code>、<code>2</code>、<code>3</code>。答案是 <b>2</b>，要把兩件事接起來：</p>
+<ol><li><b>選擇器只認整數</b>：DBL 接到 ? 端子時，LabVIEW 先轉成 I32，所以端子上有紅色的強制轉換點。</li>
+<li><b>轉換用「四捨六入、五取偶」</b>（C2）：剛好 .5 時取<b>偶數</b>。2.5 → 2，不是 3。</li></ol>
+<p>轉完是 2，有「2」這一頁，就跑 2；只有轉完的整數沒有對應的頁，才會跑 Default。</p>`,
+{fn:d=>{
+  d.innerHTML=`<div class="fig"><label>Numeric Control（DBL）<input class="v" type="number" step="0.1" value="2.5" style="width:90px"></label>
+   <span style="margin-left:10px;font-size:13px;color:#5c6577">Case 的頁：1, Default ｜ 2 ｜ 3</span><div class="o" style="margin-top:8px;font-size:15px"></div>
+   <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">${[0.5,1.5,2.5,3.5,2.4,2.6,-2.5,4.5].map(v=>`<button class="btn" data-v="${v}">${v}</button>`).join('')}</div></div>`;
+  const $=s=>d.querySelector(s);
+  function re(v){const f=Math.floor(v),r=v-f;return r===0.5?(f%2===0?f:f+1):Math.round(v);}
+  function upd(){const v=parseFloat($('.v').value);if(isNaN(v)){$('.o').textContent='';return;}
+    const n=re(v),page=n===2?'2':n===3?'3':'1, Default';
+    $('.o').innerHTML=`${v} → 轉成 I32 = <b>${n}</b>${v-Math.floor(v)===0.5?'（剛好一半，取偶數）':''} → 執行 <b>「${page}」</b>${page==='1, Default'&&n!==1?'（沒有 '+n+' 這一頁，所以跑 Default）':''}`;}
+  $('.v').oninput=upd;d.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{$('.v').value=b.dataset.v;upd();});upd();}},
+warn('只有剛好一半才取偶數：','只有<b>剛好 .5</b> 才取偶數。2.4 → 2、2.6 → 3 照一般四捨五入。Excel 的 ROUND(2.5) 是 3，LabVIEW 是 2。'),
+
 C.h3('懂','','Sequence Structure'),
 `<p>LabVIEW 靠資料流決定順序，但有時兩段程式之間沒有線、又必須先後執行（例如量一段程式的時間）。<b>Flat Sequence</b> 由左到右一格一格執行，資料從格子邊界傳到下一格；舊式的 <b>Stacked Sequence</b> 像 Case 一樣疊起來，用 Sequence Local 傳資料（不易讀，不建議）。</p>`,
 {lv:seqFig,cap:'第一格取時間 → 第二格執行 → 第三格再取時間相減。'},
