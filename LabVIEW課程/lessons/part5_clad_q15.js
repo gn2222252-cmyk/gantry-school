@@ -64,6 +64,14 @@ goals:[['學會','2D 陣列的「列」和「行」；For Loop 自動索引一�
  ['答案','<b>C</b>。下面每一個選項都在 LabVIEW 實際跑過。']],
 check:'能解釋：為什麼 D 在 4 個通道時看起來對、3 個通道時卻錯；為什麼 A、B 迴圈裡的 Index Array 3 拿到的是「第 4 個取樣」而不是「第 4 個通道」。',
 body:[
+C.h3('懂','','這題用到的功能'),
+C.table(['功能','在哪','做什麼'],[
+ ['DAQmx Read.vi',fn('Measurement I/O','NI-DAQmx','DAQmx Read.vi'),'從擷取卡讀資料。下面的選單選 <b>Analog ▸ Multiple Channels ▸ Multiple Samples ▸ 2D DBL</b>（圖上寫 Analog 2D DBL NChan NSamp）：每一列一個通道、每一行一個取樣'],
+ ['For Loop',fn('Programming','Structures','For Loop'),'N 次的迴圈。陣列接進來時預設<b>自動索引</b>：一圈拿一個元素（2D 就是一列）'],
+ ['自動索引／最後一個值','迴圈邊框上的通道右鍵 ▸ Tunnel Mode','輸入：自動索引 = 一圈拿一份。輸出：自動索引 = 收集成陣列；Last Value = 只留最後一圈'],
+ ['Index Array',fn('Programming','Array','Index Array'),'拿陣列的一部分。2D 只接列索引 → 一整列；只接行索引 → 一整行；超出範圍回傳空陣列'],
+ ['Multiply',fn('Programming','Numeric','Multiply'),'陣列 × 數字 = 每個元素都乘（多型）'],
+ ['element（Waveform Graph）',C.ctl('Modern','Graph','Waveform Graph'),'顯示結果。1D 陣列畫一條線']]),
 C.h3('懂','','先把方向搞清楚：列、行、通道、取樣'),
 `<p>DAQmx Read 選 <b>Analog 2D DBL NChan NSamp</b>（多通道、多取樣）時，輸出的 2D 陣列是：</p>`,
 C.table(['','方向','在 DAQmx 代表','LabVIEW 的索引'],[
@@ -91,6 +99,16 @@ C.table(['選項','接法','4 個通道','3 個通道','對嗎'],[
  ['D','索引進（每圈一列）→ ×2 → <b>最後一個值</b>出','[60, 62, 64, 66, 68]','[40, 42, 44, 46, 48]','✗ 通道不夠時給了最後一個通道']]),
 `<div class="fig"><div style="font-size:13px;font-weight:700;margin-bottom:6px">真實 LabVIEW：四個選項接在同一個 VI（由上到下 D、B、A、C）</div><img src="assets/real/Q15_Channel_Pick.png" alt="四個選項的方塊圖" style="max-width:100%"><div class="cap">看通道的樣子：D、B 的輸出是<b>實心</b>方塊（最後一個值），A 的輸出是<b>空心</b>方塊（自動索引）。C 的 Index Array 下面那個行索引沒接、是灰的。下載：<a href="vi/LV2018/Q15_Channel_Pick.vi" download>Q15_Channel_Pick.vi（LabVIEW 2018）</a></div></div>`,
 warn('最常見的誤會：','以為迴圈裡的 Index Array 3 拿的是「第 3 個通道」。進了自動索引的迴圈，2D 已經被切成一列一列，<b>迴圈裡面的陣列只剩 1D（一個通道的取樣）</b>，索引 3 拿的是第 4 個取樣。看線就知道：迴圈外是雙線（2D），迴圈裡變成單粗線（1D）。'),
+C.h3('做','b','自己做一次：選項 C（沒有擷取卡也能練）'),
+{todo:[
+ '開新 VI。前面板放一個 2D DBL 陣列控制項：'+C.ctl('Modern','Array, Matrix & Cluster','Array')+'，裡面放 Numeric Control，再右鍵 ▸ Add Dimension。改名 <code>Data</code>，填 4 列 × 5 行的數字（假裝是 4 個通道各 5 個取樣）。',
+ fn('Programming','Array','Index Array')+'：array 接 Data。接上 2D 後會出現兩個索引：<b>只在上面的 index (row) 接常數 3</b>，下面的不要接。',
+ fn('Programming','Numeric','Multiply')+'：x 接 Index Array 的輸出（1D），y 接常數 <code>2</code>。',
+ '輸出右鍵 ▸ Create ▸ Indicator（或接一個 Waveform Graph）。執行：拿到第 4 列 ×2。',
+ '把 Data 刪成只剩 3 列再執行：輸出變成空陣列，沒有錯誤。這就是題目要的。',
+ '有擷取卡時，把 Data 換成 '+fn('Measurement I/O','NI-DAQmx','DAQmx Read.vi')+'（選 Analog 2D DBL NChan NSamp），其他不變。',
+ '再接一次選項 D 做比較：For Loop（N 接 4）、Data 拉進迴圈（自動索引）、裡面 × 2、輸出通道右鍵 ▸ Tunnel Mode ▸ Last Value。3 列時看它輸出什麼。'
+]},
 C.h3('懂','','考試時怎麼快速判斷'),
 C.table(['看哪裡','怎麼看'],[
  ['線的粗細','細線 = 一個數；粗線 = 1D；雙線 = 2D。每穿過一個自動索引通道，進迴圈少一維、出迴圈多一維'],
