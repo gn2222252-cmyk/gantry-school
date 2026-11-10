@@ -45,7 +45,7 @@ function scanCell(t,spec){
 const DEMO=[[0.673635295,0.272246430,0.803336740],[0.029970310,0.399990172,0.391939479],[0.864414910,0.063335977,0.283020400],[0.309538909,0.843978310,0.823522421]];
 
 function fmtLab(d){
-  d.innerHTML=`<div class="fig"><div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+  d.innerHTML=`<div class="fig fmtlab"><div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
     <label style="flex:1 1 230px">Data（2D 陣列，一行一列）<textarea class="data" rows="5" style="width:100%;font:13px Consolas,monospace">${DEMO.map(r=>r.join(' ')).join('\n')}</textarea></label>
     <div style="flex:1 1 230px"><label>format string <select class="f"><option>%.3f</option><option selected>%#.3p</option><option>%.3p</option><option>%.2e</option><option>%d</option><option value="*">自己打…</option></select></label>
       <input class="fc" value="%.1f" style="width:80px;display:none">
@@ -65,6 +65,7 @@ function fmtLab(d){
       <table class="t xls"><tr><th></th>${rows[0]?rows[0].map((_,j)=>`<th>${String.fromCharCode(65+j)}</th>`).join(''):''}</tr>${rows.map((r,i)=>`<tr><th>${i+1}</th>${r.map(v=>`<td>${esc(fmtNum(v,spec))}</td>`).join('')}</tr>`).join('')}</table>`;
   }
   d.querySelectorAll('textarea,select,input').forEach(e=>e.addEventListener('input',upd));
+  window.addEventListener('ll-rand',e=>{if(!d.isConnected)return;$('.data').value=e.detail.map(r=>r.join(' ')).join('\n');upd();});
   upd();
 }
 
@@ -86,7 +87,40 @@ function readLab(d){
   upd();
 }
 
+/* 亂數 2D 陣列：按 Run 產生，標出每一格是外圈第幾圈、內圈第幾圈 */
+function randLab(d){
+  d.innerHTML=`<div class="fig"><div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+    <label>外層 N（列）<input class="r" type="number" value="3" min="1" max="8" style="width:56px"></label>
+    <label>內層 N（行）<input class="c" type="number" value="4" min="1" max="8" style="width:56px"></label>
+    <label>每個數 × <select class="m"><option value="1">1（0～1）</option><option value="100">100，再 Round（0～100 整數）</option></select></label>
+    <button class="btn pri run">▶ Run</button><button class="btn send" disabled>用這組資料到下面試格式 ↓</button></div>
+    <div class="out" style="margin-top:10px"></div></div>`;
+  const $=s=>d.querySelector(s);let last=null;
+  function run(){
+    const R=Math.max(1,Math.min(8,+$('.r').value||1)),Cc=Math.max(1,Math.min(8,+$('.c').value||1)),m=+$('.m').value;
+    last=Array.from({length:R},()=>Array.from({length:Cc},()=>m===1?Math.random():Math.round(Math.random()*100)));
+    $('.out').innerHTML=`<b>Data：${R} 列 × ${Cc} 行</b>（滑鼠移到格子上看它是哪一圈產生的）
+      <table class="t xls"><tr><th></th>${last[0].map((_,j)=>`<th>行 ${j}<br><small>內圈 i=${j}</small></th>`).join('')}</tr>
+      ${last.map((r,i)=>`<tr><th>列 ${i}<br><small>外圈 i=${i}</small></th>${r.map((v,j)=>`<td title="外圈第 ${i} 圈、內圈第 ${j} 圈">${m===1?v.toFixed(4):v}</td>`).join('')}</tr>`).join('')}</table>
+      <p style="font-size:13px;color:#5c6577;margin:4px 0 0">內圈跑 ${Cc} 次 → 一列 ${Cc} 個數（1D）。外圈跑 ${R} 次，每次拿到一列 → 疊成 ${R} 列（2D）。總共呼叫 Random Number ${R*Cc} 次。</p>`;
+    $('.send').disabled=false;
+  }
+  $('.run').onclick=run;
+  $('.send').onclick=()=>{if(!last)return;window.dispatchEvent(new CustomEvent('ll-rand',{detail:last}));const t=document.querySelector('.fmtlab');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});};
+  run();
+}
+
 /* ---------- 方塊圖 ---------- */
+const randFig={name:'F0_Random_2D.vi',view:'bd',bd:{w:560,h:250,structs:[{id:'o',k:'for',x:90,y:20,w:330,h:210},{id:'i',k:'for',x:150,y:60,w:190,h:130}],nodes:[
+  {id:'k3',k:'const',t:'i32',v:3,x:40,y:19},{id:'N1',k:'N',s:'o'},
+  {id:'k4',k:'const',t:'i32',v:4,x:104,y:52},{id:'N2',k:'N',s:'i'},
+  {id:'it1',k:'iter',s:'o'},{id:'it2',k:'iter',s:'i'},
+  {id:'rnd',k:'fn',fn:'Random Number (0-1)',x:220,y:110},
+  {id:'t1',k:'tunnel',t:'dbl[]',s:'i',side:'r',y:126,idx:true},{id:'t2',k:'tunnel',t:'dbl[][]',s:'o',side:'r',y:126,idx:true},
+  {id:'data',k:'ind',t:'dbl[][]',label:'Data',x:460,y:116}],
+ wires:[{id:'w1',from:'k3',to:'N1',t:'i32'},{id:'w2',from:'k4',to:'N2',t:'i32',pts:[[150,61],[150,69]]},
+  {id:'w3',from:'rnd.number',to:'t1.i',t:'dbl'},{id:'w4',from:'t1.o',to:'t2.i',t:'dbl[]'},{id:'w5',from:'t2.o',to:'data',t:'dbl[][]'}]}};
+
 const saveFig={name:'F1_Save_Array.vi',view:'bd',bd:{w:780,h:270,nodes:[
   {id:'fmt',k:'const',t:'str',v:'%#.3p',x:150,y:8},
   {id:'dlm',k:'const',t:'str',v:',',x:196,y:86},
@@ -149,9 +183,9 @@ const appendFig={name:'F3_Append_Line.vi',view:'bd',bd:{w:820,h:280,nodes:[
 /* ======================================================================
    F1：2D 陣列存成 CSV
    ====================================================================== */
-L.push({id:'F01',order:22,no:'F1',part:PART,title:'把 2D 陣列存成 CSV：Array To Spreadsheet String 與開、寫、關',mins:50,files:['F1_Save_Array.vi'],
-goals:[['學會','Array To Spreadsheet String 的 format string 和 delimiter；低階檔案函式「開檔 → 寫 → 關檔」三步驟；refnum 線和錯誤線怎麼串。'],
- ['做出','把一個 4 列 × 3 行的數字陣列存成 data.csv，用 Excel 打開是 4 列 3 欄。'],
+L.push({id:'F01',order:22,no:'F1',part:PART,title:'把 2D 陣列存成 CSV：Array To Spreadsheet String 與開、寫、關',mins:65,files:['F0_Random_2D.vi','F1_Save_Array.vi'],
+goals:[['學會','兩層 For Loop + Random Number 產生 3 × 4 的 2D 陣列；Array To Spreadsheet String 的 format string 和 delimiter；低階檔案函式「開檔 → 寫 → 關檔」三步驟；refnum 線和錯誤線怎麼串。'],
+ ['做出','用亂數產生一個 3 列 × 4 行的陣列，存成 data.csv，用 Excel 打開是 3 列 4 欄。'],
  ['用在哪','量測數據、生產紀錄、參數表都是這樣存。這也是課堂上「File I/O」第一個範例。']],
 check:'執行後選一個路徑存檔，用記事本打開看到 4 行、每行 3 個用逗號隔開的數字；改 format string 再存一次，數字的樣子跟著變。',
 body:[
@@ -163,6 +197,22 @@ ${C.table(['步驟','函式','做什麼'],[
  ['3 寫入','Write to Text File（選盤上叫 Write Text File）','把字串寫進 refnum 指的檔案'],
  ['4 關檔','Close File','關掉檔案。沒關的話檔案可能被鎖住，Excel 打不開，或最後一段沒寫進去']])}`,
 {lv:saveFig,cap:'和課堂截圖、參考答案 F1_Save_Array.vi 同樣的接法。墨綠色細線是 refnum，黃黑色粗線是 error，都要一路串到 Close File，順序才固定：開完才寫、寫完才關。'},
+C.h3('做','b','先做資料：用亂數產生 3 × 4 的 2D 陣列'),
+`<p>課堂上要存的數字是用亂數產生的。做法是<b>兩個 For Loop 包在一起</b>：外圈跑 3 次決定有幾<b>列</b>，內圈跑 4 次決定每列有幾<b>行</b>，最裡面放 Random Number (0-1)。</p>`,
+{steps:{title:'一步一步做出 3 × 4 亂數陣列',lv:randFig,steps:[
+ {t:'外層 For Loop：3 列',add:['o','k3','N1','it1','w1'],h:`<p>${fn('Programming','Structures','For Loop')}，在方塊圖拉一個大框。左上角的 <b>N</b> 右鍵 ▸ Create Constant，打 <code>3</code>。</p>`},
+ {t:'內層 For Loop：4 行',add:['i','k4','N2','it2','w2'],h:`<p>在外層框<b>裡面</b>再拉一個 For Loop。它的 N 接常數 <code>4</code>。這個常數放在外層框裡面或外面都可以。</p>`},
+ {t:'放 Random Number',add:['rnd'],h:`<p>${fn('Programming','Numeric','Random Number (0-1)')}${qd('Random')}，放在<b>內層</b>框裡。每執行一次輸出一個 0～1 之間的小數（不含 1）。</p>`},
+ {t:'拉線出來：兩個索引通道',add:['t1','w3','t2','w4'],h:`<p>從 Random Number 的輸出拉線，<b>穿過內層框、再穿過外層框</b>。For Loop 的輸出通道預設是<b>自動索引</b>（通道上有 <code>[ ]</code> 的樣子）：每一圈的值收集成陣列。</p><p>穿過內層：4 個數 → 1D 陣列（線變粗）。穿過外層：3 個 1D → 2D 陣列（雙線）。</p>`},
+ {t:'建立顯示器',add:['data','w5'],h:`<p>外層通道的輸出右鍵 ▸ Create ▸ Indicator，改名 <code>Data</code>。前面板把陣列顯示器往右、往下拉大，看得到 3 列 4 行。按 Run 每次數字都不一樣。</p><p class="cap">要接到上面的 F1：把這條線接到 Array To Spreadsheet String 的 array，取代 Data 控制項。</p>`}]}},
+{fn:randLab},
+C.table(['常見狀況','原因','怎麼改'],[
+ ['Data 只有一個數字，不是陣列','通道被改成 Last Value（右鍵 ▸ Tunnel Mode）','通道右鍵 ▸ Tunnel Mode ▸ Indexing'],
+ ['變成 4 列 × 3 行','外層、內層的 N 接反了','<b>外層 = 列數，內層 = 行數</b>'],
+ ['線是斷的、出現「源是 1D 陣列、匯是 2D 陣列」','顯示器是自己從控制項選盤拿的 1D 陣列','刪掉，從通道右鍵 Create ▸ Indicator，型別一定對'],
+ ['想要 0～100 的整數','Random Number 只有 0～1','乘 100，再接 '+fn('Programming','Numeric','Round To Nearest')]]),
+tip('另一種做法：','只用一個 For Loop、N = 12，再用 '+fn('Programming','Array','Reshape Array')+' 把 1D 的 12 個數變成 [3][4]。兩層迴圈比較直觀，考試和課堂都是用兩層。'),
+C.real('F0_Random_2D','參考答案 F0_Random_2D.vi：外層 N = 3、內層 N = 4，兩個索引通道輸出 2D DBL。實際執行兩次，都是 3 列 × 4 行、數值在 0～1 之間且兩次不同。下載：'+dl('F0_Random_2D')),
 C.h3('玩','','format string 試試看'),
 `<p>改下面的格式碼和分隔符號，看寫進檔案的文字和 Excel 會看到什麼。<b>%#.3p</b> 就是課堂截圖用的格式，輸出 <code>673.635m</code> 這種寫法。</p>`,
 {fn:fmtLab},
