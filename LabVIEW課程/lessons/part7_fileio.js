@@ -1,4 +1,4 @@
-/* 第七部分：檔案 I/O 實作（F1～F4）
+/* 第七部分：檔案 I/O 實作（F1～F5）
    2D 陣列存成 CSV（Array To Spreadsheet String + Open/Create/Replace、Write to Text File、Close File）、
    讀回來、紀錄檔一直往後加、高階與低階函式的選擇。
    參考答案 VI 由 labview_vi/_build/build_fileio.py 在 LabVIEW 2026 建出，test_fileio.py 實際執行並檢查寫出的檔案。 */
@@ -50,7 +50,7 @@ function fmtLab(d){
     <div style="flex:1 1 230px"><label>format string <select class="f"><option>%.3f</option><option selected>%#.3p</option><option>%.3p</option><option>%.2e</option><option>%d</option><option value="*">自己打…</option></select></label>
       <input class="fc" value="%.1f" style="width:80px;display:none">
       <br><label style="display:inline-block;margin-top:8px">delimiter <select class="dl"><option value=",">逗號 ,</option><option value="\t">Tab（預設）</option><option value=";">分號 ;</option></select></label>
-      <p class="hint" style="font-size:13px;color:#5c6577;margin:8px 0 0">格式碼和 LabVIEW 2026 實際執行 F1_Save_Array.vi 的結果一致（測過 %.3f、%#.3p、%.2e）。</p></div></div>
+      <p class="hint" style="font-size:13px;color:#5c6577;margin:8px 0 0">格式碼和 LabVIEW 2026 實際執行 F1_Save_Array.vi 的結果一致（測過 %.3f、%#.3p、%.2e）。每個格式碼的意思在下一課 F2。</p></div></div>
     <div class="out" style="margin-top:10px"></div></div>`;
   const $=s=>d.querySelector(s);
   function upd(){
@@ -108,6 +108,33 @@ function randLab(d){
   $('.run').onclick=run;
   $('.send').onclick=()=>{if(!last)return;window.dispatchEvent(new CustomEvent('ll-rand',{detail:last}));const t=document.querySelector('.fmtlab');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});};
   run();
+}
+
+/* 格式碼實驗室：一個輸入、一個格式字串，結果由 assets/lvfmt.js 算（和 LabVIEW 實測 304 筆逐字相同） */
+function fmtPlay(d){
+  const EX=[['%.2f','dbl','3.14159'],['%8.2f','dbl','3.14159'],['%08.2f','dbl','-2.5'],['%+.1f','dbl','25'],['%#.3f','dbl','12.5000'],['%.2e','dbl','0.000123'],['%.1p','dbl','1234.5678'],
+   ['%d','dbl','-2.5'],['%05d','i32','42'],['%X','i32','255'],['%04X','i32','42'],['%b','i32','5'],['%08b','i32','5'],
+   ['%s','str','Hello'],['%10s|','str','OK'],['%-10s|','str','OK'],['%.3s','str','LabVIEW'],['Name: %s','str','Ann'],['Temp=%.1f C','dbl','25.46'],['%.1f%%','dbl','87.25'],['%s','dbl','3.14'],['Count','i32','3']];
+  d.innerHTML=`<div class="fig fmtplay"><div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end">
+    <label>format string<br><input class="f" value="%8.2f" style="width:150px;font:15px Consolas,monospace"></label>
+    <label>輸入的型別<br><select class="t"><option value="dbl">DBL 小數</option><option value="i32">I32 整數</option><option value="str">字串</option></select></label>
+    <label>輸入的值<br><input class="v" value="3.14159" style="width:150px;font:15px Consolas,monospace"></label></div>
+    <div class="res" style="margin:12px 0 6px"></div>
+    <div style="font-size:13px;color:#5c6577;margin-bottom:4px">點一個例子：</div><div class="ex" style="display:flex;flex-wrap:wrap;gap:6px"></div></div>`;
+  const $=s=>d.querySelector(s);
+  $('.ex').innerHTML=EX.map((e,i)=>`<button class="btn" data-i="${i}" style="font:13px Consolas,monospace;padding:3px 8px">${esc(e[0])} ← ${esc(e[2])}</button>`).join('');
+  $('.ex').onclick=e=>{const i=e.target.dataset.i;if(i===undefined)return;const x=EX[+i];$('.f').value=x[0];$('.t').value=x[1];$('.v').value=x[2];upd();};
+  function upd(){
+    const t=$('.t').value,raw=$('.v').value;
+    let v=raw;
+    if(t!=='str'){v=Number(raw);if(raw.trim()===''||isNaN(v)){$('.res').innerHTML='<span class="warn" style="display:inline-block;margin:0">值要是數字</span>';return;}if(t==='i32')v=Math.trunc(v);}
+    const r=LVFMT.format($('.f').value,v,t);
+    if(r.err){$('.res').innerHTML=`<div class="warn" style="margin:0"><b>resulting string 是空的，error out：</b>${r.msg}</div>`;return;}
+    const vis=esc(r.text).replace(/ /g,'<span class="sp">·</span>');
+    $('.res').innerHTML=`<div style="font-size:13px;color:#5c6577">resulting string（${r.text.length} 個字元，· 是空白）</div><div class="fmtres">${vis||'&nbsp;'}</div>`;
+  }
+  d.querySelectorAll('input,select').forEach(e=>e.addEventListener('input',upd));
+  upd();
 }
 
 /* ---------- 方塊圖 ---------- */
@@ -223,7 +250,7 @@ C.table(['格式碼','意思','0.673635 變成'],[
  ['<code>#</code>（放在 % 後面）','把小數後面多餘的 0 拿掉','<code>%#.3p</code>：29.970m → <code>29.97m</code>'],
  ['<code>%d</code>','整數（四捨五入）','<code>1</code>'],
  ['不接 format string','預設 <code>%.3f</code>','<code>0.674</code>']]),
-warn('SI 記號的副作用：','<code>673.635m</code> 對人好讀，但 Excel 把它當文字，不能直接加總、畫圖；讀回 LabVIEW 時格式也要配合（下一課）。要給 Excel 算的資料，用 <code>%.3f</code> 或 <code>%.6e</code>。'),
+warn('SI 記號的副作用：','<code>673.635m</code> 對人好讀，但 Excel 把它當文字，不能直接加總、畫圖；讀回 LabVIEW 時格式也要配合（F3）。要給 Excel 算的資料，用 <code>%.3f</code> 或 <code>%.6e</code>。'),
 C.h3('懂','','Open/Create/Replace File 的 operation'),
 C.table(['值','operation','檔案已經存在','檔案不存在'],[
  ['0','open（預設）','打開','<b>錯誤 7</b>（找不到檔案）'],
@@ -232,7 +259,7 @@ C.table(['值','operation','檔案已經存在','檔案不存在'],[
  ['3','open or create','打開（寫入位置在開頭，會蓋掉前面的字）','建立'],
  ['4','replace or create','<b>清空</b>重寫','建立'],
  ['5','replace or create with confirmation','跳出對話框問要不要取代','建立']]),
-note('課堂截圖用的是 open or create：','如果檔案原本比較長，新寫的內容只蓋掉開頭那一段，後面的舊資料還在，檔案會變得很怪。<b>每次都要一份全新的檔案，用 replace or create</b>（參考答案就是這樣）。要接在後面一直加，看 F3。'),
+note('課堂截圖用的是 open or create：','如果檔案原本比較長，新寫的內容只蓋掉開頭那一段，後面的舊資料還在，檔案會變得很怪。<b>每次都要一份全新的檔案，用 replace or create</b>（參考答案就是這樣）。要接在後面一直加，看 F4。'),
 C.h3('做','b','跟著做：F1_Save_Array.vi'),
 {steps:{title:'一步一步接出 F1_Save_Array.vi',lv:saveFig,steps:[
  {t:'放 Array To Spreadsheet String',add:['a2s','data','w1'],h:`<p>${fn('Programming','String','Array To Spreadsheet String')}${qd('Array To Spreadsheet String')}。在 <b>array</b> 輸入端右鍵 ▸ Create ▸ Control，改名 <code>Data</code>。要 2D：前面板的陣列索引框右鍵 ▸ Add Dimension。</p><p class="cap">課堂上也可以用兩層 For Loop + ${fn('Programming','Numeric','Random Number (0-1)')} 產生亂數陣列來測。</p>`},
@@ -257,9 +284,99 @@ C.h3('測','q','小測驗'),
 ]});
 
 /* ======================================================================
-   F2：讀回來
+   F2：格式碼完整教學（數字與字串）
    ====================================================================== */
-L.push({id:'F02',order:23,no:'F2',part:PART,title:'讀回來：Read from Text File 與 Spreadsheet String To Array',mins:40,files:['F2_Read_Array.vi'],
+L.push({id:'F05',order:22.5,no:'F2',part:PART,title:'格式碼完整教學：數字、字串都變成你要的樣子',mins:50,
+goals:[['學會','格式碼的四個部分（旗標、寬度、精度、型別）；數字的 f、e、p、d、x、b；字串的 %s、對齊、截斷；%% 和 \\ 碼；Scan From String 反過來讀。'],
+ ['為什麼','Array To Spreadsheet String、Format Into String、Scan From String、Spreadsheet String To Array、Format Date/Time String 都用同一套格式碼，學一次到處用。'],
+ ['保證','這課每一張表、下面的實驗室，都是拿 LabVIEW 2026 實際執行的結果（304 筆）逐字核對過的。']],
+check:'不看表能寫出：數字 3.14159 → "   3.14"（%7.2f）、整數 255 → "00FF"（%04X）、字串 OK → "OK        |"（%-10s|）。',
+body:[
+C.h3('懂','','格式碼長什麼樣'),
+`<p>每個格式碼都是 <b>%</b> 開頭、<b>一個英文字母</b>結尾，中間三個部分都可以不寫：</p>`,
+`<div class="fmtanat"><span class="a0">%</span><span class="a1">-+0#</span><span class="a2">8</span><span class="a3">.2</span><span class="a4">f</span></div>
+<div class="fmtkey"><span class="a1">旗標（可不寫）</span><span class="a2">寬度：至少幾個字</span><span class="a3">精度：小數幾位／字串取幾個字</span><span class="a4">型別碼（一定要）</span></div>`,
+C.table(['部分','寫法','意思','例子'],[
+ ['旗標','<code>-</code>','靠左對齊（右邊補空白）','<code>%-8.2f</code>：3.14 → <code>3.14····</code>'],
+ ['','<code>+</code>','正數也寫 + 號','<code>%+.2f</code>：3.14 → <code>+3.14</code>'],
+ ['','<code>0</code>','左邊補 0（不是空白）','<code>%08.2f</code>：-2.5 → <code>-0002.50</code>'],
+ ['','<code>#</code>','拿掉小數尾巴多餘的 0','<code>%#.3f</code>：12.5 → <code>12.5</code>'],
+ ['寬度','數字','<b>至少</b>幾個字，不夠補空白（預設靠右）；超過不會截掉','<code>%8.2f</code>：1234.5678 → <code>·1234.57</code>'],
+ ['精度','.數字','小數：小數點後幾位。字串：最多取幾個字','<code>%.3s</code>：LabVIEW → <code>Lab</code>'],
+ ['型別','一個字母','見下面兩張表','—']]),
+C.h3('懂','','數字的型別碼（LabVIEW 實測）'),
+C.table(['格式碼','意思','3.14159','1234.5678','0.000123','-2.5'],[
+ ['<code>%f</code>','小數，預設 6 位','3.141590','1234.567800','0.000123','-2.500000'],
+ ['<code>%.2f</code>','小數 2 位','3.14','1234.57','0.00','-2.50'],
+ ['<code>%e</code>／<code>%.2e</code>','科學記號','3.14E+0','1.23E+3','1.23E-4','-2.50E+0'],
+ ['<code>%.1p</code>','SI 字首（k、m、u…）','3.1','1.2k','123.0u','-2.5'],
+ ['<code>%g</code>','LabVIEW 裡和 %f 相同','3.141590','1234.567800','0.000123','-2.500000'],
+ ['<code>%d</code>','整數（四捨五入）','3','1235','0','<b>-2</b>'],
+ ['<code>%.0f</code>','小數 0 位','3','1235','0','<b>-2</b>']]),
+warn('-2.5 為什麼是 -2 不是 -3？','LabVIEW 遇到「剛好一半」時取<b>偶數</b>（四捨六入五成雙，銀行家捨入）：2.5 → 2、3.5 → 4、-2.5 → -2。%d、%.0f、Round To Nearest 都是這樣。和 Excel 的 ROUND 不一樣。'),
+C.table(['整數格式碼','意思','42','255','5','-7（I32）'],[
+ ['<code>%d</code>','十進位','42','255','5','-7'],
+ ['<code>%5d</code>','寬 5，靠右','···42','··255','····5','···-7'],
+ ['<code>%05d</code>','寬 5，補 0','00042','00255','00005','-0007'],
+ ['<code>%x</code>／<code>%X</code>','十六進位（LabVIEW 都輸出大寫）','2A','FF','5','FFFFFFF9'],
+ ['<code>%04X</code>','十六進位、4 位補 0（FX 封包常用）','002A','00FF','0005','FFFFFFF9'],
+ ['<code>%o</code>','八進位','52','377','5','37777777771'],
+ ['<code>%b</code>／<code>%08b</code>','二進位／8 位補 0','101010／00101010','11111111','101／00000101','32 個位元']]),
+note('負數的 %X：','I32 的 -7 是 FFFFFFF9（32 位元補數）；DBL 的 -2.5 會變成 16 個 F 開頭的 64 位元。要送 PLC 的 16 位元資料，先轉成 U16 再格式化。'),
+C.h3('懂','','字串的格式碼'),
+C.table(['格式碼','Hello','OK','LabVIEW 2018','說明'],[
+ ['<code>%s</code>','Hello','OK','LabVIEW 2018','原樣放進去'],
+ ['<code>%10s|</code>','·····Hello|','········OK|','LabVIEW 2018|','寬 10 靠右；太長就不補也不截'],
+ ['<code>%-10s|</code>','Hello·····|','OK········|','LabVIEW 2018|','寬 10 靠左：做對齊的文字表格'],
+ ['<code>%.3s</code>','Hel','OK','Lab','最多取前 3 個字'],
+ ['<code>[%s]</code>','[Hello]','[OK]','[LabVIEW 2018]','前後的文字照抄'],
+ ['<code>Name: %s</code>','Name: Hello','Name: OK','Name: LabVIEW 2018','']]),
+C.table(['特殊寫法','寫出來','說明'],[
+ ['<code>%%</code>','%','要印出百分比符號。<code>%.1f%%</code>：87.25 → <code>87.2%</code>'],
+ ['<code>\\t</code>','Tab','字串常數要先右鍵 ▸ <b>\'\\\' Codes Display</b>'],
+ ['<code>\\r\\n</code>','換行（Windows）','同上；<code>\\n</code> 只有換行字元'],
+ ['<code>\\s</code>','空白','\\ 碼模式下看得到的空白'],
+ ['<code>\\\\</code>','\\','反斜線本身']]),
+C.h3('玩','','格式碼實驗室'),
+`<p>打格式字串、選型別、打值，下面就是 LabVIEW 會產生的字串。試試看把 %s 配數字、把 %d 配字串，會看到 LabVIEW 實際會報的錯誤。</p>`,
+{fn:fmtPlay},
+C.table(['錯誤','什麼時候','怎麼改'],[
+ ['81','格式碼和輸入型別不合：數字配 %s、字串配 %d','換對的型別碼；數字要變文字用 %f、%d'],
+ ['83','格式碼比輸入少，例如兩個輸入只寫一個 %s','Format Into String 有幾個輸入就要幾個格式碼'],
+ ['85','Scan From String 找不到要的東西（例如 %f 遇到 abc）','輸出變成 default value；檢查輸入的字串']]),
+C.h3('懂','','在哪裡用得到'),
+C.table(['函式','格式碼放哪','例子'],[
+ ['Format Into String','format string，可以拉長放多個輸入','<code>%s,%.3f\\r\\n</code>：時間, 數值 一行'],
+ ['Array To Spreadsheet String','format string，整個陣列共用一個','數字：<code>%.3f</code>。<b>2D 字串陣列</b>（例如有文字欄位的表）：<code>%s</code>'],
+ ['Spreadsheet String To Array','format string','讀數字 <code>%f</code>；讀 SI 記號 <code>%p</code>'],
+ ['Scan From String','format string','反過來：從字串裡挖出數字（下面）'],
+ ['Format Date/Time String','time format string（另一套碼）','<code>%Y-%m-%d %H:%M:%S</code> → 2026-11-10 09:10:46；<code>%3u</code> 是毫秒']]),
+C.h3('懂','','反過來：Scan From String'),
+`<p>儀器回傳 <code>3.14 V</code>、PLC 回傳 <code>Temp=25.5</code>，要變回數字就用 ${fn('Programming','String','Scan From String')}。同樣的格式碼，意思反過來：「從這裡讀一個數字出來」。</p>`,
+C.table(['format string','input string','output 1','remaining string','說明（LabVIEW 實測）'],[
+ ['<code>%f</code>','3.14 V','3.14','" V"','讀到不是數字就停，剩下的放 remaining string'],
+ ['<code>Temp=%f</code>','Temp=25.5','25.5','""','格式字串裡的文字要一模一樣才會跳過'],
+ ['<code>%d</code>','123abc','123','abc',''],
+ ['<code>%x</code>','1F','31','""','十六進位讀回來'],
+ ['<code>%f</code>','673.635m','673.635','m','字首被丟掉（F3 讀檔的陷阱）'],
+ ['<code>%p</code>','673.635m','0.673635','""','SI 字首換算回去'],
+ ['<code>%f</code>','1,234.5','1','",234.5"','千分位逗號會讓它停住'],
+ ['<code>%f</code>','abc','default value','abc','<b>錯誤 85</b>']]),
+C.h3('測','q','小測驗'),
+{quiz:[
+ {q:'Format Into String，format string = %06.2f，輸入 -3.5，結果是？',o:['-03.50','-3.50','0-3.50','-003.50'],a:0,ex:'寬 6 包含負號：- 0 3 . 5 0 剛好 6 個字。0 補在負號後面。'},
+ {q:'要把 PLC 的位址 4096 變成 4 個字的十六進位 "1000"，用？',o:['%04X','%4d','%x4','%.4X'],a:0,ex:'0 補零、寬 4、X 十六進位。FX 封包的位址欄就是這樣組的。'},
+ {q:'%d 輸入 2.5（DBL）結果是？',o:['2','3','2.5','錯誤 81'],a:0,ex:'剛好一半取偶數：2.5 → 2、3.5 → 4。'},
+ {q:'Format Into String 輸入是字串 "OK"，format string 寫 %d，會？',o:['錯誤 81，resulting string 是空的','輸出 0','輸出 OK'],a:0,ex:'型別不合就是 81。'},
+ {q:'想做成「名稱靠左佔 10 格、數值靠右佔 8 格、小數 2 位」的對齊表格，format string 是？',o:['%-10s%8.2f','%10s%-8.2f','%s%.2f','%-10.2s%8f'],a:0,ex:'- 是靠左；沒有 - 就靠右。兩個輸入要兩個格式碼。'},
+ {q:'Scan From String：format string = %f，input string = "12.5 mm"，remaining string 是？',o:['" mm"（前面有空白）','"mm"','""','12.5'],a:0,ex:'%f 讀到空白就停，空白留在 remaining string。'}
+]}
+]});
+
+/* ======================================================================
+   F3：讀回來
+   ====================================================================== */
+L.push({id:'F02',order:23,no:'F3',part:PART,title:'讀回來：Read from Text File 與 Spreadsheet String To Array',mins:40,files:['F2_Read_Array.vi'],
 goals:[['學會','把文字檔讀成字串、再拆回 2D 數字陣列；讀檔的 format string 要和存檔時配合。'],['做出','讀回 F1 存的檔案，得到原本的 4 × 3 陣列。'],['小心','格式不配合時數字會錯但不會報錯，這種錯最難抓。']],
 check:'讀回 F1 用 %#.3p 存的檔案：format 用 %p 時 Data 第一格是 0.673635；改成 %f 會變成 673.635（錯）。',
 body:[
@@ -291,9 +408,9 @@ C.h3('測','q','小測驗'),
 ]});
 
 /* ======================================================================
-   F3：紀錄檔一直往後加
+   F4：紀錄檔一直往後加
    ====================================================================== */
-L.push({id:'F03',order:24,no:'F3',part:PART,title:'紀錄檔：一筆一筆往後加（Set File Position）',mins:45,files:['F3_Append_Line.vi'],
+L.push({id:'F03',order:24,no:'F4',part:PART,title:'紀錄檔：一筆一筆往後加（Set File Position）',mins:45,files:['F3_Append_Line.vi'],
 goals:[['學會','open or create + Set File Position（end）接在檔案最後面；Format Date/Time String 做時間欄；\\r\\n 換行。'],['做出','每執行一次，log.csv 就多一行「時間,數值」。'],['用在專案','量測紀錄、異常紀錄、生產履歷，都是這個模式。']],
 check:'連續執行三次（數值 1.5、2.25、3），log.csv 有三行，最舊的在最上面。',
 body:[
@@ -326,9 +443,9 @@ C.h3('測','q','小測驗'),
 ]});
 
 /* ======================================================================
-   F4：高階 vs 低階、選盤導覽、錯誤碼
+   F5：高階 vs 低階、選盤導覽、錯誤碼
    ====================================================================== */
-L.push({id:'F04',order:25,no:'F4',part:PART,title:'File I/O 選盤導覽：高階、低階怎麼選，常見錯誤碼',mins:30,
+L.push({id:'F04',order:25,no:'F5',part:PART,title:'File I/O 選盤導覽：高階、低階怎麼選，常見錯誤碼',mins:30,
 goals:[['學會','File I/O 選盤上每個圖示的用途；什麼時候用一行搞定的高階 VI、什麼時候用開寫關；看到錯誤 7、8、43 知道原因。'],['之後','異常紀錄（第 20 課）用的是高階的 Write Delimited Spreadsheet；量測迴圈用低階。']],
 check:'能說出 Write Delimited Spreadsheet.vi 和「開、寫、關」各適合什麼情況，以及檔案被 Excel 開著時寫入會出現哪個錯誤。',
 body:[
