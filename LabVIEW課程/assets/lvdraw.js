@@ -17,7 +17,7 @@ const T={
   enum:{c:'#1652c9',x:'U16'},
   bool:{c:'#008a00',x:'TF'}, str:{c:'#e0359e',x:'abc'}, path:{c:'#1a8a7a',x:'Path'},
   err:{c:'#a08400',x:'err'}, clu:{c:'#8b4a2b',x:'▦'}, visa:{c:'#6b3fa0',x:'I/O'},
-  queue:{c:'#007b7b',x:'Q'}, time:{c:'#8b4a2b',x:'⏲'}, void:{c:'#888',x:''}
+  queue:{c:'#007b7b',x:'Q'}, ref:{c:'#2b6e5c',x:'ref'}, time:{c:'#8b4a2b',x:'⏲'}, void:{c:'#888',x:''}
 };
 LV.T=T;
 function base(t){return (t||'dbl').replace(/\[\]/g,'')}
@@ -97,6 +97,14 @@ const F={
  'Release Queue':{g:'Q✕',ins:['queue','force destroy?','error in'],outs:['remaining elements','error out'],w:40,h:44,col:'#dff4f4',pal:[...PR,'Synchronization','Queue Operations','Release Queue']},
  'Flush Queue':{g:'Q∅',ins:['queue','error in'],outs:['queue out','remaining elements','error out'],w:40,h:44,col:'#dff4f4',pal:[...PR,'Synchronization','Queue Operations','Flush Queue']},
  'Write Delimited Spreadsheet':{g:'CSV\n✎',ins:['file path','2D data','append?','delimiter','error in'],outs:['new file path','error out'],w:44,h:60,col:'#e6f3ea',pal:[...PR,'File I/O','Write Delimited Spreadsheet.vi']},
+ 'Open/Create/Replace File':{g:'📄\nOPEN',ins:['prompt','file path','operation','access','error in'],outs:['refnum out','cancelled','error out'],w:44,h:70,col:'#fdf5d6',pal:[...PR,'File I/O','Open/Create/Replace File']},
+ 'Write to Text File':{g:'📄\n✎abc',ins:['file','text','error in'],outs:['refnum out','error out'],w:44,h:48,col:'#fdf5d6',pal:[...PR,'File I/O','Write to Text File']},
+ 'Read from Text File':{g:'📄\nabc→',ins:['file','count','error in'],outs:['refnum out','text','error out'],w:44,h:48,col:'#fdf5d6',pal:[...PR,'File I/O','Read from Text File']},
+ 'Close File':{g:'📄\nCLOSE',ins:['refnum','error in'],outs:['path','error out'],w:44,h:40,col:'#fdf5d6',pal:[...PR,'File I/O','Close File']},
+ 'Set File Position':{g:'📄\n→|',ins:['refnum','offset','from','error in'],outs:['refnum out','error out'],w:44,h:58,col:'#fdf5d6',pal:[...PR,'File I/O','Advanced File Functions','Set File Position']},
+ 'Array To Spreadsheet String':{g:'▦→abc',ins:['format string','array','delimiter'],outs:['spreadsheet string'],w:50,h:46,pal:[...PR,'String','Array To Spreadsheet String']},
+ 'Spreadsheet String To Array':{g:'abc→▦',ins:['format string','spreadsheet string','delimiter'],outs:['array'],w:50,h:46,pal:[...PR,'String','Spreadsheet String To Array']},
+ 'Random Number (0-1)':{g:'🎲',ins:[],outs:['number'],pal:[...PR,'Numeric','Random Number (0-1)']},
  'Build Path':{g:'📁+',ins:['base path','name or relative path'],outs:['appended path'],pal:[...PR,'File I/O','Build Path']},
  'Application Directory':{g:'📁',ins:[],outs:['application directory'],pal:[...PR,'File I/O','File Constants','Application Directory.vi']},
  'Format Date/Time String':{g:'%Y',ins:['time format string','time stamp'],outs:['date/time string'],w:46,pal:[...PR,'Timing','Format Date/Time String'],col:'#e8f0ff'},
